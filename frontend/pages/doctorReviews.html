@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – My Reviews</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">D</div>
+                <div class="user-details"><h3 id="sidebar-name">Doctor</h3><p id="sidebar-role">doctor</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="/pages/doctorDashboard.html">📊 Dashboard</a>
+            <a href="/pages/doctorAppointments.html">📋 Appointments</a>
+            <div class="nav-section">Management</div>
+            <a href="/pages/doctorSchedule.html">📅 My Schedule</a>
+            <a href="/pages/doctorReviews.html" class="active">⭐ Reviews</a>
+            <a href="/pages/prescriptionView.html">💊 Prescriptions</a>
+            <div class="nav-section">Account</div>
+            <a href="/pages/patientProfile.html">👤 My Profile</a>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>⭐ My Reviews</h2><p>See what your patients say about you</p></div>
+        </div>
+
+        <div class="stats-grid mb-3">
+            <div class="stat-card">
+                <div class="stat-icon blue">⭐</div>
+                <div class="stat-value" id="avg-rating">0.0</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">💬</div>
+                <div class="stat-value" id="total-reviews">0</div>
+                <div class="stat-label">Total Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">🏆</div>
+                <div class="stat-value" id="five-star">0</div>
+                <div class="stat-label">5-Star Reviews</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Patient Reviews</h3>
+                <select id="filter-rating" onchange="filterReviews()" style="padding:8px 16px;border:2px solid var(--border);border-radius:var(--radius-full);font-family:inherit;outline:none;">
+                    <option value="">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="2">2 Stars</option>
+                    <option value="1">1 Star</option>
+                </select>
+            </div>
+            <div class="card-body" id="reviews-list">
+                <div class="flex-center" style="padding:40px;"><div class="spinner spinner-lg spinner-primary"></div></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let allReviews = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireRole("doctor")) return;
+    setupSidebar();
+    loadReviews();
+});
+
+async function loadReviews() {
+    const user = getUser();
+    const res = await apiRequest(`/doctors/${user.userId}`);
+    if (!res?.ok) { showToast("Failed to load reviews","error"); return; }
+
+    allReviews = res.data.doctor?.reviews || [];
+    const rating = res.data.doctor?.rating || 0;
+
+    document.getElementById("avg-rating").textContent = rating.toFixed(1);
+    document.getElementById("total-reviews").textContent = allReviews.length;
+    document.getElementById("five-star").textContent = allReviews.filter(r => r.rating === 5).length;
+
+    renderReviews(allReviews);
+}
+
+function filterReviews() {
+    const val = document.getElementById("filter-rating").value;
+    const filtered = val ? allReviews.filter(r => r.rating === parseInt(val)) : allReviews;
+    renderReviews(filtered);
+}
+
+function renderReviews(reviews) {
+    const container = document.getElementById("reviews-list");
+    if (!reviews.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⭐</div><h3>No reviews yet</h3><p>Reviews from patients will appear here.</p></div>`;
+        return;
+    }
+    container.innerHTML = reviews.map(r => `
+        <div style="display:flex;gap:16px;padding:20px;border-bottom:1px solid var(--border-light);">
+            <div class="doctor-avatar" style="width:48px;height:48px;font-size:1.1rem;flex-shrink:0;">${r.patientName?.charAt(0)||"P"}</div>
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                    <strong>${r.patientName||"Anonymous"}</strong>
+                    <span style="color:var(--warning);">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</span>
+                    <span style="margin-left:auto;font-size:0.8rem;color:var(--text-light);">${formatDate(r.createdAt)}</span>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;">${r.comment||"No comment"}</p>
+            </div>
+        </div>`).join("");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+[
+  {
+    "email": "arun@demo.com",
+    "password": "$2b$12$4QeyWViM/voLoGgF83hp4.GrzUoP59UsXpPcRIUFu11XHhNQLv9Ci",
+    "fullName": "Dr. Arun Kumar",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:52.589932",
+    "_seeded": true,
+    "_id": "ddc10f78-14b6-494a-9b73-a7816a9c7d2c"
+  },
+  {
+    "email": "priya@demo.com",
+    "password": "$2b$12$uS7/qtG0aC8Ncp.fZ.gXvu4xGMt83ri7g7NFDwVm1iie1v0lXFNEu",
+    "fullName": "Dr. Priya Sharma",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:52.806346",
+    "_seeded": true,
+    "_id": "9b62e265-434e-41d8-957f-2c4941a207fc"
+  },
+  {
+    "email": "ravi@demo.com",
+    "password": "$2b$12$hLwecTY/EPEs/4ZvYeYaNeqUW0Hwxr83/2T9LH1G4xU4P7jQKgSdG",
+    "fullName": "Dr. Ravi Menon",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:53.023170",
+    "_seeded": true,
+    "_id": "8a2bd805-782b-4fc5-9b85-0a75107a96c4"
+  },
+  {
+    "email": "sneha@demo.com",
+    "password": "$2b$12$gJfiKDTncQ0mW9189631euZPOknGW78s4PLdLRZofFl21aoBxtW8q",
+    "fullName": "Dr. Sneha Patel",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:53.240829",
+    "_seeded": true,
+    "_id": "36fdf51d-a462-406c-a0cc-ac56e7bb3012"
+  },
+  {
+    "email": "karthik@demo.com",
+    "password": "$2b$12$Vr9RW45iWhu8OzdQ.sasTuOsHOSQyHHQLz1EiCCmjNmFQK4a8Mvni",
+    "fullName": "Dr. Karthik Raj",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:53.460172",
+    "_seeded": true,
+    "_id": "f18b4864-fe78-47b2-bc71-8fea9f6b03d2"
+  },
+  {
+    "email": "divya@demo.com",
+    "password": "$2b$12$y70Mls5VVb9xOI/W6rUN2.nGs6YYk249Ahw/0xVQKoKcOt0mBIqrO",
+    "fullName": "Dr. Divya Nair",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:53.676435",
+    "_seeded": true,
+    "_id": "734b6c6f-78fb-4f34-b4d3-383a3ea78c13"
+  },
+  {
+    "email": "suresh@demo.com",
+    "password": "$2b$12$mzBJ/wJkCx5wlp5J3aKseOzKttVmD2datHduvjcY6ZvF4lhEyL622",
+    "fullName": "Dr. Suresh Babu",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:53.892831",
+    "_seeded": true,
+    "_id": "55ac88a3-22e2-4d6c-bb53-1423b059aa7c"
+  },
+  {
+    "email": "meena@demo.com",
+    "password": "$2b$12$QkfNurDox11FXI7WHaVrMuLadv5ijp0CvFtIxnpEDel1SSnwIY03m",
+    "fullName": "Dr. Meena Krishnan",
+    "role": "doctor",
+    "phone": "9876543210",
+    "createdAt": "2026-03-09T07:02:54.109907",
+    "_seeded": true,
+    "_id": "a718f095-1d60-4fb3-b994-a4efe3984e59"
+  },
+  {
+    "email": "vignesh@demo.com",
+    "password": "$2b$12$4zZpl3YhG0VO46jew4Ldf.bFfGfGkWSb.BsjpEv0jZrZg3M2aR776",
+    "fullName": "Vignesh Kumar",
+    "role": "patient",
+    "phone": "9876500000",
+    "bloodGroup": "O+",
+    "age": 25,
+    "gender": "Male",
+    "createdAt": "2026-03-09T07:02:54.326357",
+    "_seeded": true,
+    "_id": "c4e6098a-eace-4176-8d5a-baa9b5435f53"
+  },
+  {
+    "email": "anjali@demo.com",
+    "password": "$2b$12$fsQRHoE3/rg8oKbjJxMlDeDtgREFWAVT0j1r21nD.FBy.NHEJJNea",
+    "fullName": "Anjali Singh",
+    "role": "patient",
+    "phone": "9876500000",
+    "bloodGroup": "B+",
+    "age": 30,
+    "gender": "Female",
+    "createdAt": "2026-03-09T07:02:54.542845",
+    "_seeded": true,
+    "_id": "ecc5a2a5-49a7-4b04-95c9-e045fb931f6c"
+  },
+  {
+    "email": "rahul@demo.com",
+    "password": "$2b$12$WRq.HMnpwCT6RxNieoRN4Oa77rMz9GwOH8.QVToh48JnguhunRYRi",
+    "fullName": "Rahul Patel",
+    "role": "patient",
+    "phone": "9876500000",
+    "bloodGroup": "A+",
+    "age": 22,
+    "gender": "Male",
+    "createdAt": "2026-03-09T07:02:54.758327",
+    "_seeded": true,
+    "_id": "7bb535da-4b0a-43e8-953c-8a19ba28627e"
+  },
+  {
+    "email": "admin@medtrack.com",
+    "password": "$2b$12$handFn9jsLRuoYDKEHpvBeKAmMv9Zb9//bj/AnTL6F8GfXUwr/nuq",
+    "fullName": "Admin User",
+    "role": "admin",
+    "phone": "9999999999",
+    "createdAt": "2026-03-09T07:02:54.975113",
+    "_seeded": true,
+    "_id": "c5eb0fe6-c4fa-4cf5-8fc2-0c79aeb0a862"
+  }
+]

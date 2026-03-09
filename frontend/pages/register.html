@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create a MedTrack account – Register as a Patient or Doctor.">
+    <title>MedTrack – Register</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="auth-container">
+    <!-- Left Panel -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <div class="logo-icon">🏥</div>
+            <h1>Med<span>Track</span></h1>
+            <p>Join thousands of patients and doctors who trust MedTrack for seamless healthcare management.</p>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="feat-icon">✅</div>
+                    <div><strong>Free to Join</strong><p>No subscription fees, forever free for patients</p></div>
+                </div>
+                <div class="auth-feature">
+                    <div class="feat-icon">🔒</div>
+                    <div><strong>Secure & Private</strong><p>Your health data is encrypted and protected</p></div>
+                </div>
+                <div class="auth-feature">
+                    <div class="feat-icon">🤖</div>
+                    <div><strong>AI Symptom Check</strong><p>Get instant department suggestions with AI</p></div>
+                </div>
+                <div class="auth-feature">
+                    <div class="feat-icon">📱</div>
+                    <div><strong>Always Available</strong><p>Access your health dashboard anytime, anywhere</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="auth-right">
+        <div class="auth-form-wrap" style="max-width:500px;">
+            <div class="logo-mobile">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🏥</div>
+                <h1>MedTrack</h1>
+            </div>
+
+            <h2>Create Account ✨</h2>
+            <p>Start your health journey today</p>
+
+            <!-- Role Picker -->
+            <div style="margin:24px 0 8px;">
+                <label style="display:block;font-size:0.875rem;font-weight:600;margin-bottom:10px;">I am registering as</label>
+                <div class="role-picker">
+                    <div class="role-pill selected" id="role-patient" onclick="selectRole('patient')">
+                        <div class="role-icon">👤</div>
+                        <span>Patient</span>
+                    </div>
+                    <div class="role-pill" id="role-doctor" onclick="selectRole('doctor')">
+                        <div class="role-icon">🩺</div>
+                        <span>Doctor</span>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="role" value="patient">
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" placeholder="+91 98765 43210">
+                    </div>
+                </div>
+
+                <!-- Doctor-specific fields -->
+                <div id="doctor-fields" class="hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="specialization">Specialization</label>
+                            <select id="specialization">
+                                <option>General Physician</option>
+                                <option>Cardiology</option>
+                                <option>Neurology</option>
+                                <option>Orthopedics</option>
+                                <option>Dermatology</option>
+                                <option>ENT</option>
+                                <option>Pediatrics</option>
+                                <option>Gynecology</option>
+                                <option>Psychiatry</option>
+                                <option>Ophthalmology</option>
+                                <option>Pulmonology</option>
+                                <option>Gastroenterology</option>
+                                <option>Endocrinology</option>
+                                <option>Urology</option>
+                                <option>Dentistry</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="qualification">Qualification</label>
+                            <input type="text" id="qualification" placeholder="MBBS, MD">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="experience">Experience (years)</label>
+                            <input type="number" id="experience" placeholder="5" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="fee">Consultation Fee (₹)</label>
+                            <input type="number" id="fee" placeholder="500" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="password" id="password" placeholder="Min 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="register-btn" class="btn btn-primary btn-block btn-lg">
+                    Create Account →
+                </button>
+            </form>
+
+            <p style="text-align:center;margin-top:20px;color:var(--text-secondary);font-size:0.9rem;">
+                Already have an account? <a href="/pages/login.html" style="font-weight:700;">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/register.js"></script>
+<script>
+function selectRole(role) {
+    document.getElementById("role").value = role;
+    document.getElementById("role-patient").classList.toggle("selected", role === "patient");
+    document.getElementById("role-doctor").classList.toggle("selected", role === "doctor");
+    document.getElementById("doctor-fields").classList.toggle("hidden", role !== "doctor");
+}
+</script>
+</body>
+</html>

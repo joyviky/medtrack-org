@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – My Schedule</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">D</div>
+                <div class="user-details"><h3 id="sidebar-name">Doctor</h3><p id="sidebar-role">doctor</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="/pages/doctorDashboard.html">📊 Dashboard</a>
+            <a href="/pages/doctorAppointments.html">📋 Appointments</a>
+            <div class="nav-section">Management</div>
+            <a href="/pages/doctorSchedule.html" class="active">📅 My Schedule</a>
+            <a href="/pages/doctorReviews.html">⭐ Reviews</a>
+            <a href="/pages/prescriptionView.html">💊 Prescriptions</a>
+            <div class="nav-section">Account</div>
+            <a href="/pages/patientProfile.html">👤 My Profile</a>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>📅 My Schedule</h2><p>Manage your weekly availability</p></div>
+            <button class="btn btn-primary" onclick="saveSchedule()">💾 Save Changes</button>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header"><h3>Weekly Availability</h3></div>
+            <div class="card-body" id="schedule-form">
+                <div class="flex-center" style="padding:40px;"><div class="spinner spinner-lg spinner-primary"></div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3>⏰ Time Slots Preview</h3></div>
+            <div class="card-body" id="slots-preview">
+                <p style="color:var(--text-secondary);">Save your schedule to see available time slots.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const DAYS = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+let scheduleData = {};
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireRole("doctor")) return;
+    setupSidebar();
+    loadSchedule();
+});
+
+async function loadSchedule() {
+    const user = getUser();
+    const res = await apiRequest(`/doctors/${user.userId}`);
+    const form = document.getElementById("schedule-form");
+
+    if (res?.ok) {
+        const schedule = res.data.doctor?.schedule || [];
+        DAYS.forEach(day => {
+            const slot = schedule.find(s => s.day === day) || { day, isAvailable: false, startTime: "09:00", endTime: "17:00" };
+            scheduleData[day] = slot;
+        });
+    } else {
+        DAYS.forEach(day => { scheduleData[day] = { day, isAvailable: false, startTime: "09:00", endTime: "17:00" }; });
+    }
+
+    renderScheduleForm();
+}
+
+function renderScheduleForm() {
+    const form = document.getElementById("schedule-form");
+    form.innerHTML = DAYS.map(day => `
+        <div class="schedule-row" id="row-${day}" style="display:grid;grid-template-columns:160px 1fr;align-items:center;gap:20px;padding:16px;border-bottom:1px solid var(--border-light);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <label class="toggle-switch" style="position:relative;display:inline-block;width:44px;height:24px;">
+                    <input type="checkbox" id="toggle-${day}" ${scheduleData[day].isAvailable?"checked":""} onchange="toggleDay('${day}')">
+                    <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:24px;transition:0.3s;"></span>
+                </label>
+                <label for="toggle-${day}" style="font-weight:600;text-transform:capitalize;min-width:80px;cursor:pointer;">${day}</label>
+            </div>
+            <div id="times-${day}" style="display:flex;gap:16px;align-items:center;${scheduleData[day].isAvailable?"":"opacity:0.4;pointer-events:none;"}">
+                <div class="form-group" style="margin:0;flex:1;">
+                    <label style="font-size:0.78rem;">Start Time</label>
+                    <input type="time" id="start-${day}" value="${scheduleData[day].startTime}" style="padding:8px 12px;">
+                </div>
+                <span style="color:var(--text-secondary);padding-top:16px;">–</span>
+                <div class="form-group" style="margin:0;flex:1;">
+                    <label style="font-size:0.78rem;">End Time</label>
+                    <input type="time" id="end-${day}" value="${scheduleData[day].endTime}" style="padding:8px 12px;">
+                </div>
+            </div>
+        </div>`).join("");
+
+    // Style the toggle checkboxes
+    document.querySelectorAll(".toggle-switch input").forEach(input => {
+        input.addEventListener("change", function() {
+            const span = this.nextElementSibling;
+            span.style.background = this.checked ? "var(--primary)" : "var(--border)";
+        });
+        const span = input.nextElementSibling;
+        span.style.background = input.checked ? "var(--primary)" : "var(--border)";
+    });
+}
+
+function toggleDay(day) {
+    const checked = document.getElementById(`toggle-${day}`).checked;
+    const times = document.getElementById(`times-${day}`);
+    times.style.opacity = checked ? "1" : "0.4";
+    times.style.pointerEvents = checked ? "auto" : "none";
+}
+
+async function saveSchedule() {
+    const schedule = DAYS.map(day => ({
+        day,
+        isAvailable: document.getElementById(`toggle-${day}`).checked,
+        startTime: document.getElementById(`start-${day}`).value,
+        endTime: document.getElementById(`end-${day}`).value
+    }));
+
+    const res = await apiRequest("/doctors/schedule", "PUT", { schedule });
+    if (res?.ok) showToast("Schedule saved successfully!", "success");
+    else showToast(res?.data?.error || "Failed to save", "error");
+}
+</script>
+</body>
+</html>

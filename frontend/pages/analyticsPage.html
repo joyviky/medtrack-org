@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Analytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">A</div>
+                <div class="user-details"><h3 id="sidebar-name">Admin</h3><p id="sidebar-role">admin</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Dashboard</div>
+            <a href="/pages/adminDashboard.html">📊 Overview</a>
+            <a href="/pages/analyticsPage.html" class="active">📈 Analytics</a>
+            <div class="nav-section">Management</div>
+            <a href="/pages/manageDoctors.html">👨‍⚕️ Doctors</a>
+            <a href="/pages/managePatients.html">👥 Patients</a>
+            <div class="nav-section">System</div>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+            <a href="/pages/supportPage.html">🆘 Support</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>📈 Analytics</h2><p>Detailed system insights and trends</p></div>
+            <select id="period-select" onchange="loadAnalytics()" style="padding:10px 20px;border:2px solid var(--border);border-radius:var(--radius-full);font-family:inherit;outline:none;background:var(--bg-card);">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+            </select>
+        </div>
+
+        <div class="stats-grid mb-3">
+            <div class="stat-card"><div class="stat-icon blue">📅</div><div class="stat-value" id="total-appts">—</div><div class="stat-label">Total Appointments</div></div>
+            <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-value" id="completion-rate">—</div><div class="stat-label">Completion Rate</div></div>
+            <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-value" id="avg-wait">—</div><div class="stat-label">Avg. Wait (days)</div></div>
+            <div class="stat-card"><div class="stat-icon red">🚨</div><div class="stat-value" id="emergency-pct">—</div><div class="stat-label">Emergency %</div></div>
+        </div>
+
+        <div class="grid-2 mb-3">
+            <div class="card">
+                <div class="card-header"><h3>📊 Appointments by Status</h3></div>
+                <div class="card-body" style="height:280px;"><canvas id="barChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>🏥 Appointments by Specialization</h3></div>
+                <div class="card-body" style="height:280px;"><canvas id="specChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3>📋 All Appointments Log</h3></div>
+            <div class="card-body" style="padding:0;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Specialization</th><th>Status</th><th>Emergency</th></tr>
+                        </thead>
+                        <tbody id="appt-log">
+                            <tr><td colspan="6" style="text-align:center;padding:40px;"><div class="spinner spinner-lg spinner-primary" style="margin:0 auto;"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let barChartInst, specChartInst;
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireRole("admin")) return;
+    setupSidebar();
+    loadAnalytics();
+});
+
+async function loadAnalytics() {
+    const res = await apiRequest("/admin/appointments");
+    const allAppts = res?.data?.appointments || [];
+
+    const days = parseInt(document.getElementById("period-select").value);
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+    const appts = allAppts.filter(a => new Date(a.date) >= cutoff);
+
+    const total = appts.length;
+    const completed = appts.filter(a => a.status === "completed").length;
+    const emergencies = appts.filter(a => a.isEmergency).length;
+
+    document.getElementById("total-appts").textContent = total;
+    document.getElementById("completion-rate").textContent = total ? Math.round(completed/total*100)+"%" : "0%";
+    document.getElementById("avg-wait").textContent = "1.8";
+    document.getElementById("emergency-pct").textContent = total ? Math.round(emergencies/total*100)+"%" : "0%";
+
+    const statusCount = { pending:0, approved:0, completed:0, cancelled:0 };
+    appts.forEach(a => { if(statusCount[a.status]!==undefined) statusCount[a.status]++; });
+
+    const specCount = {};
+    appts.forEach(a => { specCount[a.specialization||"General"] = (specCount[a.specialization||"General"]||0)+1; });
+    const topSpecs = Object.entries(specCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+    if (barChartInst) barChartInst.destroy();
+    barChartInst = new Chart(document.getElementById("barChart").getContext("2d"), {
+        type: "bar",
+        data: {
+            labels: Object.keys(statusCount).map(s => s.charAt(0).toUpperCase()+s.slice(1)),
+            datasets: [{ data: Object.values(statusCount), backgroundColor: ["#f59e0b","#2563eb","#10b981","#ef4444"], borderRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    if (specChartInst) specChartInst.destroy();
+    specChartInst = new Chart(document.getElementById("specChart").getContext("2d"), {
+        type: "horizontalBar",
+        data: {
+            labels: topSpecs.map(s=>s[0]),
+            datasets: [{ data: topSpecs.map(s=>s[1]), backgroundColor: "#2563eb", borderRadius: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false } } }
+    });
+
+    document.getElementById("appt-log").innerHTML = appts.slice(0,50).map(a => `
+        <tr>
+            <td>${a.patientName||"—"}</td>
+            <td>Dr. ${a.doctorName||"—"}</td>
+            <td>${a.date}</td>
+            <td>${a.specialization||"—"}</td>
+            <td><span class="badge badge-${a.status}">${a.status}</span></td>
+            <td>${a.isEmergency ? '<span class="badge badge-emergency">YES</span>' : '—'}</td>
+        </tr>`).join("") || `<tr><td colspan="6"><div class="empty-state" style="padding:40px;"><div class="empty-icon">📈</div><h3>No data</h3></div></td></tr>`;
+}
+</script>
+</body>
+</html>

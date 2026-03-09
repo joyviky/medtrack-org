@@ -1,0 +1,52 @@
+[
+  {
+    "doctorId": "ddeed5ca-b2a9-4fc9-9ba1-1d307b58d17b",
+    "patientId": "c4e6098a-eace-4176-8d5a-baa9b5435f53",
+    "patientName": "Vignesh Kumar",
+    "rating": 5,
+    "comment": "Excellent cardiologist! Very thorough and explained everything clearly.",
+    "createdAt": "2026-03-09T07:02:54.977323",
+    "_seeded": true,
+    "_id": "98d273f6-155c-4d06-bf6c-4fe0a6da9f68"
+  },
+  {
+    "doctorId": "183437a3-f13f-4c12-bb17-91a35fa8c2bf",
+    "patientId": "ecc5a2a5-49a7-4b04-95c9-e045fb931f6c",
+    "patientName": "Anjali Singh",
+    "rating": 4,
+    "comment": "Very knowledgeable. Helped completely with my skin allergy issue.",
+    "createdAt": "2026-03-09T07:02:54.977462",
+    "_seeded": true,
+    "_id": "654eb068-293e-48c8-9745-03538ddca8c3"
+  },
+  {
+    "doctorId": "6f034f7f-143a-4b3a-94bc-2bb22a2f75a4",
+    "patientId": "c4e6098a-eace-4176-8d5a-baa9b5435f53",
+    "patientName": "Vignesh Kumar",
+    "rating": 5,
+    "comment": "Best neurologist I have visited. My headaches are completely gone.",
+    "createdAt": "2026-03-09T07:02:54.977558",
+    "_seeded": true,
+    "_id": "663fca27-0ff7-49b8-8487-87153be1e2ab"
+  },
+  {
+    "doctorId": "bf6e9780-7131-4bce-9018-cae49efae607",
+    "patientId": "c4e6098a-eace-4176-8d5a-baa9b5435f53",
+    "patientName": "Vignesh Kumar",
+    "rating": 4,
+    "comment": "Great doctor for knee issues. Treatment worked perfectly.",
+    "createdAt": "2026-03-09T07:02:54.977670",
+    "_seeded": true,
+    "_id": "b3944be8-6512-473a-8a22-e348d8a5bb1d"
+  },
+  {
+    "doctorId": "a8793903-e216-4297-8f17-bf4c7e75548a",
+    "patientId": "7bb535da-4b0a-43e8-953c-8a19ba28627e",
+    "patientName": "Rahul Patel",
+    "rating": 5,
+    "comment": "Very thorough in diagnosis. Extremely patient and kind doctor.",
+    "createdAt": "2026-03-09T07:02:54.977783",
+    "_seeded": true,
+    "_id": "f66a43f6-48a8-462a-abbc-34cf86f075c5"
+  }
+]

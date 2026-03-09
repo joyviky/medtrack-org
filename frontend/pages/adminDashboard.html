@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">A</div>
+                <div class="user-details"><h3 id="sidebar-name">Admin</h3><p id="sidebar-role">admin</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Dashboard</div>
+            <a href="/pages/adminDashboard.html" class="active">📊 Overview</a>
+            <a href="/pages/analyticsPage.html">📈 Analytics</a>
+            <div class="nav-section">Management</div>
+            <a href="/pages/manageDoctors.html">👨‍⚕️ Doctors</a>
+            <a href="/pages/managePatients.html">👥 Patients</a>
+            <div class="nav-section">System</div>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+            <a href="/pages/supportPage.html">🆘 Support</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>Admin Overview 🛡️</h2><p>System-wide statistics and management</p></div>
+            <div style="display:flex;gap:12px;">
+                <a href="/pages/manageDoctors.html" class="btn btn-outline btn-sm">+ Add Doctor</a>
+                <a href="/pages/analyticsPage.html" class="btn btn-primary btn-sm">📈 Analytics</a>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="admin-stats">
+            <div class="stat-card"><div class="stat-icon blue">👨‍⚕️</div><div class="stat-value" id="stat-doctors">—</div><div class="stat-label">Total Doctors</div></div>
+            <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-value" id="stat-patients">—</div><div class="stat-label">Total Patients</div></div>
+            <div class="stat-card"><div class="stat-icon orange">📅</div><div class="stat-value" id="stat-appointments">—</div><div class="stat-label">Total Appointments</div></div>
+            <div class="stat-card"><div class="stat-icon red">🚨</div><div class="stat-value" id="stat-emergency">—</div><div class="stat-label">Emergency Cases</div></div>
+        </div>
+
+        <div class="grid-2 mb-3">
+            <div class="card">
+                <div class="card-header"><h3>📊 Appointment Status</h3></div>
+                <div class="card-body" style="height:250px;"><canvas id="statusChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>🏥 Top Specializations</h3></div>
+                <div class="card-body" id="specialization-list">
+                    <div class="flex-center" style="height:200px;"><div class="spinner spinner-lg spinner-primary"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><h3>👨‍⚕️ Recent Doctors</h3><a href="/pages/manageDoctors.html" class="btn btn-outline btn-sm">View All</a></div>
+                <div class="card-body" id="recent-doctors"><div class="flex-center" style="padding:40px;"><div class="spinner spinner-lg spinner-primary"></div></div></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>📋 Recent Appointments</h3><a href="/pages/analyticsPage.html" class="btn btn-outline btn-sm">View All</a></div>
+                <div class="card-body" id="recent-appointments"><div class="flex-center" style="padding:40px;"><div class="spinner spinner-lg spinner-primary"></div></div></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireRole("admin")) return;
+    setupSidebar();
+    loadAdminDashboard();
+});
+
+async function loadAdminDashboard() {
+    const [doctorsRes, appointmentsRes] = await Promise.all([
+        apiRequest("/admin/doctors"),
+        apiRequest("/admin/appointments")
+    ]);
+
+    const doctors = doctorsRes?.data?.doctors || [];
+    const appointments = appointmentsRes?.data?.appointments || [];
+    const patients = [...new Set(appointments.map(a => a.patientId))];
+
+    document.getElementById("stat-doctors").textContent = doctors.length;
+    document.getElementById("stat-patients").textContent = patients.length;
+    document.getElementById("stat-appointments").textContent = appointments.length;
+    document.getElementById("stat-emergency").textContent = appointments.filter(a => a.isEmergency).length;
+
+    // Status chart
+    const statusCount = { pending:0, approved:0, completed:0, cancelled:0 };
+    appointments.forEach(a => { if(statusCount[a.status]!==undefined) statusCount[a.status]++; });
+    new Chart(document.getElementById("statusChart").getContext("2d"), {
+        type: "doughnut",
+        data: {
+            labels: ["Pending","Approved","Completed","Cancelled"],
+            datasets: [{ data: Object.values(statusCount), backgroundColor: ["#f59e0b","#2563eb","#10b981","#ef4444"], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+    });
+
+    // Specializations
+    const specs = {};
+    doctors.forEach(d => { specs[d.specialization] = (specs[d.specialization]||0)+1; });
+    const specList = document.getElementById("specialization-list");
+    const topSpecs = Object.entries(specs).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    specList.innerHTML = topSpecs.map(([s,c]) => `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <span style="flex:1;font-size:0.9rem;">${s}</span>
+            <div style="flex:2;background:var(--bg);border-radius:99px;height:8px;overflow:hidden;">
+                <div style="background:var(--gradient-primary);height:100%;width:${(c/doctors.length*100)||0}%;border-radius:99px;"></div>
+            </div>
+            <span style="font-weight:700;font-size:0.9rem;min-width:20px;">${c}</span>
+        </div>`).join("") || "<p>No data</p>";
+
+    // Recent doctors
+    document.getElementById("recent-doctors").innerHTML = doctors.slice(0,5).map(d => `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-light);">
+            <div class="doctor-avatar" style="width:40px;height:40px;font-size:1rem;">${d.fullName?.charAt(0)||"D"}</div>
+            <div style="flex:1;"><strong style="font-size:0.9rem;">Dr. ${d.fullName}</strong><p style="font-size:0.8rem;color:var(--text-secondary);">${d.specialization}</p></div>
+            <span class="badge ${d.isVerified?'badge-completed':'badge-pending'}">${d.isVerified?'Verified':'Pending'}</span>
+        </div>`).join("") || "<div class='empty-state' style='padding:30px;'><div class='empty-icon'>👨‍⚕️</div><h3>No doctors yet</h3></div>";
+
+    // Recent appointments
+    document.getElementById("recent-appointments").innerHTML = appointments.slice(0,5).map(a => `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-light);">
+            <div style="flex:1;"><strong style="font-size:0.9rem;">${a.patientName||"Patient"}</strong><p style="font-size:0.8rem;color:var(--text-secondary);">${a.doctorName||"Doctor"} · ${a.date}</p></div>
+            <span class="badge badge-${a.status}">${a.status}</span>
+        </div>`).join("") || "<div class='empty-state' style='padding:30px;'><div class='empty-icon'>📅</div><h3>No appointments yet</h3></div>";
+}
+</script>
+</body>
+</html>

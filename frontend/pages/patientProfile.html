@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your MedTrack profile.">
+    <title>MedTrack – My Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">U</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">User</h3>
+                        <p id="sidebar-role">user</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Navigation</div>
+                <a href="#" onclick="goBack()">← Go Back</a>
+                <a href="/pages/patientProfile.html" class="active">👤 My Profile</a>
+                <a href="/pages/notifications.html">🔔 Notifications</a>
+            </nav>
+            <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div id="profile-content">
+                <div class="flex-center" style="padding: 60px;">
+                    <div class="spinner spinner-lg spinner-primary"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAuth()) return;
+            setupSidebar();
+            loadProfile();
+        });
+
+        async function loadProfile() {
+            showLoading();
+            const res = await apiRequest("/auth/profile");
+            hideLoading();
+
+            if (res?.ok) {
+                renderProfile(res.data);
+            }
+        }
+
+        function renderProfile(data) {
+            const user = data.user;
+            const profile = data.profile || {};
+            const container = document.getElementById("profile-content");
+
+            container.innerHTML = `
+                <div class="profile-header">
+                    <div class="profile-avatar">${user.fullName?.charAt(0) || 'U'}</div>
+                    <div class="profile-info">
+                        <h2>${user.fullName || 'User'}</h2>
+                        <p>${user.email}</p>
+                        <div class="profile-meta">
+                            <span>🏷 ${user.role}</span>
+                            <span>📞 ${user.phone || 'Not set'}</span>
+                            ${user.role === 'doctor' ? `<span>🏥 ${profile.specialization || ''}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>✏️ Edit Profile</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="profile-form" onsubmit="updateProfile(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="edit-name" value="${user.fullName || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="edit-phone" value="${user.phone || ''}">
+                                </div>
+                            </div>
+
+                            ${user.role === 'patient' ? `
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Date of Birth</label>
+                                        <input type="date" id="edit-dob" value="${profile.dateOfBirth || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Gender</label>
+                                        <select id="edit-gender">
+                                            <option value="" ${!profile.gender ? 'selected' : ''}>Select</option>
+                                            <option value="male" ${profile.gender === 'male' ? 'selected' : ''}>Male</option>
+                                            <option value="female" ${profile.gender === 'female' ? 'selected' : ''}>Female</option>
+                                            <option value="other" ${profile.gender === 'other' ? 'selected' : ''}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Blood Group</label>
+                                        <select id="edit-blood">
+                                            <option value="">Select</option>
+                                            ${['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg => 
+                                                `<option value="${bg}" ${profile.bloodGroup === bg ? 'selected' : ''}>${bg}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Emergency Contact</label>
+                                        <input type="tel" id="edit-emergency" value="${profile.emergencyContact || ''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <textarea id="edit-address" rows="2">${profile.address || ''}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Allergies (comma-separated)</label>
+                                    <input type="text" id="edit-allergies" value="${(profile.allergies || []).join(', ')}" placeholder="e.g., Penicillin, Dust, Peanuts">
+                                </div>
+                                <div class="form-group">
+                                    <label>Medical Conditions (comma-separated)</label>
+                                    <input type="text" id="edit-conditions" value="${(profile.conditions || []).join(', ')}" placeholder="e.g., Diabetes, Hypertension">
+                                </div>
+                            ` : ''}
+
+                            ${user.role === 'doctor' ? `
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Specialization</label>
+                                        <input type="text" id="edit-spec" value="${profile.specialization || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Qualification</label>
+                                        <input type="text" id="edit-qual" value="${profile.qualification || ''}">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Experience (years)</label>
+                                        <input type="number" id="edit-exp" value="${profile.experienceYears || 0}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Consultation Fee (₹)</label>
+                                        <input type="number" id="edit-fee" value="${profile.consultationFee || 500}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Bio</label>
+                                    <textarea id="edit-bio" rows="3">${profile.bio || ''}</textarea>
+                                </div>
+                            ` : ''}
+
+                            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const user = getUser();
+
+            let data = {
+                fullName: document.getElementById("edit-name").value,
+                phone: document.getElementById("edit-phone").value
+            };
+
+            let endpoint = "";
+
+            if (user.role === "patient") {
+                endpoint = "/patients/profile/update";
+                data.dateOfBirth = document.getElementById("edit-dob")?.value || "";
+                data.gender = document.getElementById("edit-gender")?.value || "";
+                data.bloodGroup = document.getElementById("edit-blood")?.value || "";
+                data.address = document.getElementById("edit-address")?.value || "";
+                data.emergencyContact = document.getElementById("edit-emergency")?.value || "";
+                data.allergies = (document.getElementById("edit-allergies")?.value || "").split(",").map(s => s.trim()).filter(Boolean);
+                data.conditions = (document.getElementById("edit-conditions")?.value || "").split(",").map(s => s.trim()).filter(Boolean);
+            } else if (user.role === "doctor") {
+                endpoint = "/doctors/profile/update";
+                data.specialization = document.getElementById("edit-spec")?.value || "";
+                data.qualification = document.getElementById("edit-qual")?.value || "";
+                data.experienceYears = parseInt(document.getElementById("edit-exp")?.value) || 0;
+                data.consultationFee = parseInt(document.getElementById("edit-fee")?.value) || 500;
+                data.bio = document.getElementById("edit-bio")?.value || "";
+            }
+
+            const res = await apiRequest(endpoint, "PUT", data);
+
+            if (res?.ok) {
+                showToast("Profile updated successfully! ✅", "success");
+                // Update local storage
+                user.fullName = data.fullName;
+                saveAuth(getToken(), user);
+                setupSidebar();
+            } else {
+                showToast(res?.data?.error || "Failed to update profile", "error");
+            }
+        }
+
+        function goBack() { window.history.back(); }
+    </script>
+</body>
+</html>

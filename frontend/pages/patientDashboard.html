@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MedTrack Patient Dashboard - View appointments, medical records, and health status.">
+    <title>MedTrack – Patient Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">P</div>
+                <div class="user-details">
+                    <h3 id="sidebar-name">Patient</h3>
+                    <p id="sidebar-role">patient</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="/pages/patientDashboard.html" class="active">📊 Dashboard</a>
+            <a href="/pages/searchDoctor.html">🔍 Find Doctor</a>
+            <a href="/pages/bookAppointment.html">📅 Book Appointment</a>
+
+            <div class="nav-section">My Health</div>
+            <a href="/pages/patientAppointments.html">📋 My Appointments</a>
+            <a href="/pages/appointmentHistory.html">🕐 History</a>
+            <a href="/pages/medicalRecords.html">📁 Medical Records</a>
+            <a href="/pages/prescriptionView.html">💊 Prescriptions</a>
+            <a href="/pages/uploadReport.html">📤 Upload Report</a>
+
+            <div class="nav-section">Wellness</div>
+            <a href="/pages/emergencyBooking.html">🚨 Emergency</a>
+            <a href="/pages/healthTips.html">💡 Health Tips</a>
+            <a href="/pages/supportPage.html">🆘 Support</a>
+
+            <div class="nav-section">Account</div>
+            <a href="/pages/patientProfile.html">👤 My Profile</a>
+            <a href="/pages/notifications.html" class="notification-badge">
+                🔔 Notifications
+                <span class="badge-count" id="notif-count" style="display:none;">0</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="#" onclick="logout()">🚪 Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h2>Welcome back! 👋</h2>
+                <p>Here's your health overview for today</p>
+            </div>
+            <div style="display:flex;gap:12px;">
+                <a href="/pages/emergencyBooking.html" class="btn btn-danger btn-sm">🚨 Emergency</a>
+                <a href="/pages/searchDoctor.html" class="btn btn-primary">🔍 Find a Doctor</a>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">📅</div>
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Appointments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">⏳</div>
+                <div class="stat-value" id="stat-pending">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">✅</div>
+                <div class="stat-value" id="stat-completed">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">🔔</div>
+                <div class="stat-value" id="stat-upcoming">0</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid-2 mb-3">
+            <div class="card">
+                <div class="card-body text-center" style="padding: 32px;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🚨</div>
+                    <h3 style="margin-bottom: 8px;">Emergency Consultation</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Need immediate help? Find the next available doctor.</p>
+                    <a href="/pages/emergencyBooking.html" class="btn btn-emergency">🚑 Emergency Booking</a>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body text-center" style="padding: 32px;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🤖</div>
+                    <h3 style="margin-bottom: 8px;">AI Symptom Checker</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Describe symptoms and get department suggestions.</p>
+                    <button class="btn btn-primary" onclick="openSymptomChecker()">🔬 Check Symptoms</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 Upcoming Appointments</h3>
+                <a href="/pages/patientAppointments.html" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div class="card-body" id="upcoming-appointments">
+                <div class="flex-center" style="padding: 40px;">
+                    <div class="spinner spinner-lg spinner-primary"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Symptom Checker Modal -->
+<div class="modal-overlay" id="symptom-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>🤖 AI Symptom Checker</h3>
+            <button class="modal-close" onclick="closeSymptomModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Describe your symptoms</label>
+                <textarea id="symptoms-input" placeholder="e.g., headache, fever, cough, chest pain..." rows="4"></textarea>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="checkSymptoms()">🔍 Suggest Department</button>
+            <div id="symptom-results" class="mt-2"></div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+<script>
+function openSymptomChecker() { document.getElementById("symptom-modal").classList.add("active"); }
+function closeSymptomModal() { document.getElementById("symptom-modal").classList.remove("active"); }
+
+async function checkSymptoms() {
+    const symptoms = document.getElementById("symptoms-input").value;
+    if (!symptoms.trim()) { showToast("Please describe your symptoms", "warning"); return; }
+    const res = await apiRequest("/notifications/symptoms/suggest", "POST", { symptoms });
+    const container = document.getElementById("symptom-results");
+    if (res?.ok) {
+        const { matchedSymptoms, suggestedDepartments } = res.data;
+        container.innerHTML = `
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-body">
+                    <h4 style="margin-bottom: 8px;">🎯 Matched Symptoms</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">${matchedSymptoms.length > 0 ? matchedSymptoms.join(", ") : "No exact matches found"}</p>
+                    <h4 style="margin-bottom: 8px;">🏥 Suggested Departments</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${suggestedDepartments.map(d => `<span class="badge badge-approved">${d}</span>`).join("")}
+                    </div>
+                    <p class="mt-2" style="font-size: 0.82rem; color: var(--text-light);">⚠️ AI suggestion only. Please consult a doctor for proper diagnosis.</p>
+                </div>
+            </div>`;
+    }
+}
+</script>
+</body>
+</html>

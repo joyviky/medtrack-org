@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Doctor Appointments - Manage patient appointments on MedTrack.">
+    <title>MedTrack – Doctor Appointments</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">D</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">Doctor</h3>
+                        <p id="sidebar-role">doctor</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Main</div>
+                <a href="/pages/doctorDashboard.html">📊 Dashboard</a>
+                <a href="/pages/doctorAppointments.html" class="active">📋 Appointments</a>
+                <div class="nav-section">Management</div>
+                <a href="/pages/uploadReport.html">📤 Upload Records</a>
+                <div class="nav-section">Account</div>
+                <a href="/pages/patientProfile.html">👤 My Profile</a>
+                <a href="/pages/notifications.html">🔔 Notifications</a>
+            </nav>
+            <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Patient Appointments 📋</h2>
+                    <p>Manage all your patient appointments</p>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <select id="status-filter" onchange="filterAppointments()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <input type="date" id="date-filter" onchange="filterAppointments()">
+            </div>
+
+            <div id="appointments-list">
+                <div class="flex-center" style="padding: 60px;">
+                    <div class="spinner spinner-lg spinner-primary"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/appointment.js"></script>
+</body>
+</html>

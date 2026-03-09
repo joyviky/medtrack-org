@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View appointment details on MedTrack.">
+    <title>MedTrack – Appointment Details</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">U</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">User</h3>
+                        <p id="sidebar-role">user</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Navigation</div>
+                <a href="#" onclick="goBack()">← Go Back</a>
+            </nav>
+            <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Appointment Details 📋</h2>
+                    <p>Complete information about this appointment</p>
+                </div>
+                <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+            </div>
+
+            <div id="appointment-detail">
+                <div class="flex-center" style="padding: 60px;">
+                    <div class="spinner spinner-lg spinner-primary"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAuth()) return;
+            setupSidebar();
+            loadDetail();
+        });
+
+        async function loadDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get("id");
+            if (!id) {
+                document.getElementById("appointment-detail").innerHTML = '<p>No appointment ID provided.</p>';
+                return;
+            }
+
+            showLoading();
+            const res = await apiRequest(`/appointments/${id}`);
+            hideLoading();
+
+            if (res?.ok) {
+                renderDetail(res.data.appointment);
+            } else {
+                document.getElementById("appointment-detail").innerHTML = `
+                    <div class="health-alert danger">Failed to load appointment details.</div>
+                `;
+            }
+        }
+
+        function renderDetail(appt) {
+            const container = document.getElementById("appointment-detail");
+
+            container.innerHTML = `
+                ${appt.healthAlerts && appt.healthAlerts.length > 0 ? `
+                    <div class="mb-3">
+                        ${appt.healthAlerts.map(a => `<div class="health-alert danger">${a}</div>`).join("")}
+                    </div>
+                ` : ''}
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><h3>Appointment Info</h3></div>
+                        <div class="card-body">
+                            <div class="prescription-card" style="box-shadow: none; padding: 0;">
+                                <div class="rx-body">
+                                    <div class="rx-item">
+                                        <span class="rx-label">Status</span>
+                                        <span class="badge badge-${appt.status}">${appt.status.replace('_', ' ')}</span>
+                                    </div>
+                                    <div class="rx-item">
+                                        <span class="rx-label">Date</span>
+                                        <span>📅 ${appt.date}</span>
+                                    </div>
+                                    <div class="rx-item">
+                                        <span class="rx-label">Time</span>
+                                        <span>🕐 ${appt.timeSlot}</span>
+                                    </div>
+                                    <div class="rx-item">
+                                        <span class="rx-label">Reason</span>
+                                        <span>${appt.reason || 'Not specified'}</span>
+                                    </div>
+                                    ${appt.isEmergency ? '<div class="rx-item"><span class="rx-label">Priority</span><span class="badge badge-emergency">EMERGENCY</span></div>' : ''}
+                                    ${appt.notes ? `<div class="rx-item"><span class="rx-label">Notes</span><span>${appt.notes}</span></div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><h3>People</h3></div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="margin-bottom: 8px;">🩺 Doctor</h4>
+                                <p style="font-weight: 600;">Dr. ${appt.doctorName || 'N/A'}</p>
+                                <p style="color: var(--text-secondary);">${appt.specialization || ''}</p>
+                                ${appt.consultationFee ? `<p style="color: var(--primary);">💰 ₹${appt.consultationFee}</p>` : ''}
+                            </div>
+                            <div>
+                                <h4 style="margin-bottom: 8px;">👤 Patient</h4>
+                                <p style="font-weight: 600;">${appt.patientName || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${appt.prescription ? `
+                    <div class="card mt-3">
+                        <div class="card-header"><h3>💊 Prescription</h3></div>
+                        <div class="card-body">
+                            <p>${appt.prescription}</p>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

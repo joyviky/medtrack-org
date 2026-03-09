@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Search and find the best doctors on MedTrack. Filter by specialization and ratings.">
+    <title>MedTrack – Find a Doctor</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">P</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">Patient</h3>
+                        <p id="sidebar-role">patient</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Main</div>
+                <a href="/pages/patientDashboard.html">📊 Dashboard</a>
+                <a href="/pages/searchDoctor.html" class="active">🔍 Find Doctor</a>
+                <a href="/pages/bookAppointment.html">📅 Book Appointment</a>
+                <div class="nav-section">My Health</div>
+                <a href="/pages/patientAppointments.html">📋 My Appointments</a>
+                <a href="/pages/medicalRecords.html">📁 Medical Records</a>
+                <a href="/pages/appointmentHistory.html">🕐 History</a>
+                <div class="nav-section">Account</div>
+                <a href="/pages/patientProfile.html">👤 My Profile</a>
+                <a href="/pages/notifications.html">🔔 Notifications</a>
+            </nav>
+            <div class="sidebar-bottom">
+                <a href="#" onclick="logout()">🚪 Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Find a Doctor 🔍</h2>
+                    <p>Search by name, specialization, or rating</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search by doctor name...">
+                <select id="spec-filter">
+                    <option value="">All Specializations</option>
+                    <option value="General Physician">General Physician</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="ENT">ENT</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Gynecology">Gynecology</option>
+                    <option value="Psychiatry">Psychiatry</option>
+                    <option value="Ophthalmology">Ophthalmology</option>
+                    <option value="Pulmonology">Pulmonology</option>
+                    <option value="Gastroenterology">Gastroenterology</option>
+                </select>
+            </div>
+
+            <!-- Doctors Grid -->
+            <div class="doctors-grid" id="doctors-list">
+                <div class="flex-center" style="padding: 60px; grid-column: 1 / -1;">
+                    <div class="spinner spinner-lg spinner-primary"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay" id="booking-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📅 Book Appointment</h3>
+                <button class="modal-close" onclick="closeBookModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px; font-weight: 600;" id="modal-doctor-name"></p>
+
+                <div class="form-group">
+                    <label>Select Date</label>
+                    <input type="date" id="appt-date" onchange="loadSlots()" min="">
+                </div>
+
+                <div class="form-group">
+                    <label>Available Time Slots</label>
+                    <div id="slots-container">
+                        <p class="text-center" style="color: var(--text-light);">Select a date to see available slots</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Reason for Visit (optional)</label>
+                    <textarea id="appt-reason" placeholder="Describe your symptoms or reason..." rows="3"></textarea>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="appt-emergency" style="width: auto;">
+                    <label for="appt-emergency" style="margin: 0; color: var(--danger); font-weight: 600;">
+                        🚨 Mark as Emergency
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBookModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirm-booking-btn" onclick="confirmBooking()">
+                    Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/searchDoctor.js"></script>
+    <script>
+        // Set min date to today
+        document.addEventListener("DOMContentLoaded", () => {
+            const dateInput = document.getElementById("appt-date");
+            if (dateInput) {
+                dateInput.min = new Date().toISOString().split('T')[0];
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Smart Hospital Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background: var(--gradient-dark); overflow-x: hidden; }
+        .landing { min-height: 100vh; }
+
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 40px 24px; position: relative; overflow: hidden; }
+        .hero::before { content:''; position:absolute; width:700px; height:700px; background:rgba(37,99,235,0.08); border-radius:50%; top:-200px; right:-200px; animation:float 10s ease-in-out infinite; }
+        .hero::after { content:''; position:absolute; width:500px; height:500px; background:rgba(6,182,212,0.06); border-radius:50%; bottom:-150px; left:-150px; animation:float 8s ease-in-out infinite reverse; }
+
+        .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(37,99,235,0.2); border:1px solid rgba(37,99,235,0.4); color:#93c5fd; padding:8px 20px; border-radius:99px; font-size:0.85rem; font-weight:600; margin-bottom:28px; }
+
+        .hero h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; color: white; letter-spacing: -0.03em; line-height:1.1; margin-bottom: 20px; }
+        .hero h1 span { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.2rem; color: rgba(255,255,255,0.65); max-width: 580px; line-height: 1.8; margin-bottom: 40px; }
+
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
+        .hero-buttons .btn-hero { padding: 16px 36px; font-size: 1.05rem; border-radius: var(--radius-full); }
+
+        .stats-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+        .stat-pill { text-align: center; }
+        .stat-pill .num { font-size: 2rem; font-weight: 900; color: white; display: block; }
+        .stat-pill .lbl { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+
+        /* Features */
+        .features { padding: 80px 24px; background: linear-gradient(180deg, #0f172a, #111827); }
+        .features-inner { max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; color: white; font-size: 2.2rem; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em; }
+        .section-sub { text-align: center; color: rgba(255,255,255,0.5); margin-bottom: 56px; font-size: 1rem; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        .feature-card {
+            background: rgba(255,255,255,0.04); border-radius: var(--radius-lg);
+            padding: 32px; border: 1px solid rgba(255,255,255,0.08);
+            transition: var(--transition); cursor: default;
+        }
+        .feature-card:hover { background: rgba(255,255,255,0.07); transform: translateY(-6px); border-color: rgba(37,99,235,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .feature-card .feat-icon { font-size: 2.5rem; margin-bottom: 16px; }
+        .feature-card h3 { color: white; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+        .feature-card p { color: rgba(255,255,255,0.5); font-size: 0.9rem; line-height: 1.7; }
+
+        /* Roles Section */
+        .roles { padding: 80px 24px; background: #0f172a; }
+        .roles-inner { max-width: 1000px; margin: 0 auto; }
+        .roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .role-card {
+            background: rgba(255,255,255,0.04); border-radius: var(--radius-xl);
+            padding: 40px 32px; text-align: center; border: 2px solid rgba(255,255,255,0.08);
+            transition: var(--transition-bounce);
+        }
+        .role-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: var(--shadow-glow-lg); }
+        .role-card .role-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+        .role-card h3 { color: white; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+        .role-card p { color: rgba(255,255,255,0.5); font-size: 0.88rem; line-height: 1.7; margin-bottom: 24px; }
+        .role-card ul { text-align: left; color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 28px; }
+        .role-card ul li { padding: 6px 0; display: flex; align-items: center; gap: 8px; }
+        .role-card ul li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        /* CTA */
+        .cta { padding: 80px 24px; text-align: center; background: linear-gradient(135deg, #1e293b, #0f172a); }
+        .cta h2 { font-size: 2.4rem; font-weight: 900; color: white; margin-bottom: 16px; letter-spacing: -0.02em; }
+        .cta p { color: rgba(255,255,255,0.6); max-width: 480px; margin: 0 auto 36px; font-size: 1rem; }
+
+        /* Navbar */
+        .navbar { position: fixed; top: 0; width: 100%; z-index: 100; background: rgba(15,23,42,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 32px; }
+        .nav-inner { max-width: 1200px; margin: 0 auto; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo { font-size: 1.3rem; font-weight: 800; color: white; }
+        .nav-logo span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 8px; }
+
+        @media (max-width: 768px) {
+            .roles-grid { grid-template-columns: 1fr; }
+            .navbar .nav-links .btn-primary { display: none; }
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-inner">
+        <div class="nav-logo">🏥 Med<span>Track</span></div>
+        <div class="nav-links">
+            <a href="/pages/login.html" class="btn btn-secondary btn-sm">Sign In</a>
+            <a href="/pages/register.html" class="btn btn-primary btn-sm">Get Started</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero landing">
+    <div class="hero-badge">🏥 Trusted by 10,000+ patients</div>
+    <h1>Healthcare<br>Made <span>Simple & Smart</span></h1>
+    <p>Book appointments online, access medical records, connect with top doctors — all in one powerful platform.</p>
+    <div class="hero-buttons">
+        <a href="/pages/register.html" class="btn btn-primary btn-hero">Get Started Free →</a>
+        <a href="/pages/login.html" class="btn" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-full);padding:16px 36px;font-size:1.05rem;font-weight:600;">Sign In</a>
+    </div>
+    <div class="stats-row">
+        <div class="stat-pill"><span class="num">50+</span><span class="lbl">Specializations</span></div>
+        <div class="stat-pill"><span class="num">10K+</span><span class="lbl">Happy Patients</span></div>
+        <div class="stat-pill"><span class="num">500+</span><span class="lbl">Doctors</span></div>
+        <div class="stat-pill"><span class="num">24/7</span><span class="lbl">Support</span></div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="features-inner">
+        <h2 class="section-title">Everything you need in one place</h2>
+        <p class="section-sub">Powerful features designed for patients, doctors, and administrators</p>
+        <div class="features-grid">
+            <div class="feature-card"><div class="feat-icon">📅</div><h3>Smart Appointment Booking</h3><p>Book, reschedule, or cancel appointments instantly. See real-time doctor availability and choose your preferred time slot.</p></div>
+            <div class="feature-card"><div class="feat-icon">🤖</div><h3>AI Symptom Checker</h3><p>Describe your symptoms and get immediate department recommendations. Our AI helps you find the right specialist.</p></div>
+            <div class="feature-card"><div class="feat-icon">📁</div><h3>Digital Medical Records</h3><p>Store and access your complete medical history, lab reports, prescriptions, and X-rays securely in one place.</p></div>
+            <div class="feature-card"><div class="feat-icon">🚨</div><h3>Emergency Booking</h3><p>Instantly connect with the next available doctor for urgent medical needs with our emergency booking feature.</p></div>
+            <div class="feature-card"><div class="feat-icon">🔔</div><h3>Smart Notifications</h3><p>Get timely reminders for upcoming appointments, prescription refills, and health check-up schedules.</p></div>
+            <div class="feature-card"><div class="feat-icon">📊</div><h3>Health Analytics</h3><p>Track health trends, appointment history, and wellness metrics with detailed analytics and insights.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- Roles -->
+<section class="roles">
+    <div class="roles-inner">
+        <h2 class="section-title">Built for Everyone</h2>
+        <p class="section-sub">Whether you're a patient, doctor, or admin — we've got you covered</p>
+        <div class="roles-grid">
+            <div class="role-card">
+                <div class="role-emoji">👤</div>
+                <h3>For Patients</h3>
+                <p>Take control of your health journey with easy-to-use tools.</p>
+                <ul>
+                    <li>Book & manage appointments</li>
+                    <li>View medical records</li>
+                    <li>AI symptom checker</li>
+                    <li>Emergency booking</li>
+                    <li>Prescription access</li>
+                </ul>
+                <a href="/pages/register.html" class="btn btn-primary btn-sm btn-block">Join as Patient</a>
+            </div>
+            <div class="role-card" style="border-color:rgba(6,182,212,0.3);">
+                <div class="role-emoji">🩺</div>
+                <h3>For Doctors</h3>
+                <p>Streamline your practice with powerful management tools.</p>
+                <ul>
+                    <li>Manage appointments</li>
+                    <li>Set weekly schedule</li>
+                    <li>Upload prescriptions</li>
+                    <li>View patient records</li>
+                    <li>Earn patient reviews</li>
+                </ul>
+                <a href="/pages/register.html" class="btn btn-primary btn-sm btn-block">Join as Doctor</a>
+            </div>
+            <div class="role-card">
+                <div class="role-emoji">🛡️</div>
+                <h3>For Admins</h3>
+                <p>Full visibility and control over your healthcare platform.</p>
+                <ul>
+                    <li>Verify doctors</li>
+                    <li>Manage all users</li>
+                    <li>View analytics</li>
+                    <li>Monitor appointments</li>
+                    <li>System oversight</li>
+                </ul>
+                <a href="/pages/login.html" class="btn btn-secondary btn-sm btn-block">Admin Login</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <h2>Ready to get started?</h2>
+    <p>Join MedTrack today and experience healthcare management like never before. It's free for patients.</p>
+    <a href="/pages/register.html" class="btn btn-primary btn-lg" style="border-radius:var(--radius-full);">Create Free Account →</a>
+</section>
+
+<script src="/js/api.js"></script>
+<script>
+    if (isLoggedIn()) {
+        const user = getUser();
+        const redirect = { patient:"/pages/patientDashboard.html", doctor:"/pages/doctorDashboard.html", admin:"/pages/adminDashboard.html" };
+        window.location.href = redirect[user?.role] || "/pages/patientDashboard.html";
+    }
+</script>
+</body>
+</html>

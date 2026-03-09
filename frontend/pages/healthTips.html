@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Health Tips</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">P</div>
+                <div class="user-details"><h3 id="sidebar-name">Patient</h3><p id="sidebar-role">patient</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="/pages/patientDashboard.html">📊 Dashboard</a>
+            <a href="/pages/searchDoctor.html">🔍 Find Doctor</a>
+            <a href="/pages/bookAppointment.html">📅 Book Appointment</a>
+            <div class="nav-section">My Health</div>
+            <a href="/pages/patientAppointments.html">📋 My Appointments</a>
+            <a href="/pages/medicalRecords.html">📁 Medical Records</a>
+            <div class="nav-section">Wellness</div>
+            <a href="/pages/emergencyBooking.html">🚨 Emergency</a>
+            <a href="/pages/healthTips.html" class="active">💡 Health Tips</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>💡 Health Tips & Wellness</h2><p>Expert advice for a healthier life</p></div>
+            <div class="search-bar" style="margin:0;width:300px;">
+                <input type="text" id="tip-search" placeholder="🔍 Search tips..." oninput="filterTips()" style="min-width:0;flex:1;">
+            </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;" id="category-tabs">
+            <button class="btn btn-primary btn-sm" onclick="showCategory('all',this)">All</button>
+            <button class="btn btn-secondary btn-sm" onclick="showCategory('heart',this)">❤️ Cardio</button>
+            <button class="btn btn-secondary btn-sm" onclick="showCategory('nutrition',this)">🥗 Nutrition</button>
+            <button class="btn btn-secondary btn-sm" onclick="showCategory('mental',this)">🧠 Mental Health</button>
+            <button class="btn btn-secondary btn-sm" onclick="showCategory('fitness',this)">🏋️ Fitness</button>
+            <button class="btn btn-secondary btn-sm" onclick="showCategory('sleep',this)">😴 Sleep</button>
+        </div>
+
+        <!-- Tips Grid -->
+        <div id="tips-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;"></div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const TIPS = [
+    { category:"heart", icon:"❤️", title:"Exercise for 30 Minutes Daily", desc:"Regular moderate exercise reduces the risk of heart disease by 35%. Try brisk walking, cycling, or swimming.", color:"var(--danger)" },
+    { category:"heart", icon:"🩺", title:"Monitor Blood Pressure", desc:"Check your blood pressure regularly. Normal range is 120/80 mmHg. High BP often has no symptoms.", color:"var(--danger)" },
+    { category:"nutrition", icon:"🥗", title:"Eat More Vegetables", desc:"Aim for 5 servings of fruits and vegetables daily. They're rich in fiber, vitamins, and antioxidants.", color:"var(--success)" },
+    { category:"nutrition", icon:"💧", title:"Stay Hydrated", desc:"Drink at least 8 glasses (2 liters) of water daily. Good hydration supports every system in your body.", color:"var(--accent)" },
+    { category:"nutrition", icon:"🚫", title:"Reduce Sugar Intake", desc:"Excess sugar leads to obesity, diabetes, and heart disease. Avoid sugary drinks and processed foods.", color:"var(--warning)" },
+    { category:"mental", icon:"🧘", title:"Practice Mindfulness", desc:"10 minutes of daily meditation reduces stress and anxiety. Apps like Headspace can help you start.", color:"#8b5cf6" },
+    { category:"mental", icon:"😊", title:"Maintain Social Connections", desc:"Strong social bonds improve mental health and longevity. Regularly connect with family and friends.", color:"#ec4899" },
+    { category:"mental", icon:"📵", title:"Digital Detox", desc:"Limit screen time before bed. Blue light disrupts sleep. Try a 1-hour screen-free period at night.", color:"#6366f1" },
+    { category:"fitness", icon:"🏋️", title:"Strength Training", desc:"Include 2-3 strength training sessions weekly. It boosts metabolism, bone density, and muscle health.", color:"#f97316" },
+    { category:"fitness", icon:"🧎", title:"Stretch Daily", desc:"10 minutes of stretching prevents injury and improves flexibility. Great for office workers with sedentary jobs.", color:"#14b8a6" },
+    { category:"sleep", icon:"😴", title:"Get 7-9 Hours of Sleep", desc:"Quality sleep is vital for immunity, mood, memory, and metabolism. Stick to a consistent sleep schedule.", color:"#6366f1" },
+    { category:"sleep", icon:"🌙", title:"Create a Sleep Routine", desc:"Go to bed and wake up at the same time even on weekends. A cool, dark room promotes better sleep.", color:"#8b5cf6" },
+    { category:"heart", icon:"🚭", title:"Quit Smoking", desc:"Smoking doubles the risk of heart attacks. Quitting at any age significantly improves heart health.", color:"var(--danger)" },
+    { category:"nutrition", icon:"🌾", title:"Choose Whole Grains", desc:"Replace white rice and bread with whole grain versions for more fiber, nutrients, and stable energy.", color:"#a16207" },
+    { category:"fitness", icon:"🚶", title:"Walk 10,000 Steps", desc:"Daily walking improves cardiovascular health, mood, and weight management. Use a pedometer to track.", color:"#0284c7" },
+    { category:"mental", icon:"🎯", title:"Set Realistic Goals", desc:"Setting achievable goals reduces stress and builds self-confidence. Break large goals into small steps.", color:"#059669" },
+];
+
+let currentCategory = "all";
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireAuth()) return;
+    setupSidebar();
+    renderTips(TIPS);
+});
+
+function showCategory(cat, btn) {
+    currentCategory = cat;
+    document.querySelectorAll("#category-tabs button").forEach(b => {
+        b.className = "btn btn-secondary btn-sm";
+    });
+    btn.className = "btn btn-primary btn-sm";
+    filterTips();
+}
+
+function filterTips() {
+    const q = document.getElementById("tip-search").value.toLowerCase();
+    const filtered = TIPS.filter(t =>
+        (currentCategory === "all" || t.category === currentCategory) &&
+        (t.title.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q))
+    );
+    renderTips(filtered);
+}
+
+function renderTips(tips) {
+    document.getElementById("tips-grid").innerHTML = tips.map(t => `
+        <div class="card" style="overflow:hidden;transition:transform 0.3s;cursor:default;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <div style="background:${t.color};padding:24px 24px 16px;display:flex;align-items:center;gap:12px;">
+                <span style="font-size:2.5rem;">${t.icon}</span>
+                <h3 style="color:white;font-size:1rem;font-weight:700;">${t.title}</h3>
+            </div>
+            <div class="card-body">
+                <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.7;">${t.desc}</p>
+                <span class="badge" style="margin-top:12px;background:var(--primary-100);color:var(--primary-dark);">${t.category.charAt(0).toUpperCase()+t.category.slice(1)}</span>
+            </div>
+        </div>`).join("") || `<div class="empty-state" style="grid-column:1/-1;padding:60px;"><div class="empty-icon">💡</div><h3>No tips found</h3></div>`;
+}
+</script>
+</body>
+</html>

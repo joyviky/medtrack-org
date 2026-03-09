@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View your medical records timeline on MedTrack.">
+    <title>MedTrack – Medical Records</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">P</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">Patient</h3>
+                        <p id="sidebar-role">patient</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Main</div>
+                <a href="/pages/patientDashboard.html">📊 Dashboard</a>
+                <a href="/pages/searchDoctor.html">🔍 Find Doctor</a>
+                <div class="nav-section">My Health</div>
+                <a href="/pages/patientAppointments.html">📋 My Appointments</a>
+                <a href="/pages/medicalRecords.html" class="active">📁 Medical Records</a>
+                <a href="/pages/uploadReport.html">📤 Upload Report</a>
+                <a href="/pages/appointmentHistory.html">🕐 History</a>
+                <div class="nav-section">Account</div>
+                <a href="/pages/patientProfile.html">👤 My Profile</a>
+                <a href="/pages/notifications.html">🔔 Notifications</a>
+            </nav>
+            <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Medical Records 📁</h2>
+                    <p>Your health timeline</p>
+                </div>
+                <a href="/pages/uploadReport.html" class="btn btn-primary">📤 Upload Record</a>
+            </div>
+
+            <div id="records-timeline">
+                <div class="flex-center" style="padding: 60px;">
+                    <div class="spinner spinner-lg spinner-primary"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAuth()) return;
+            setupSidebar();
+            loadRecords();
+        });
+
+        async function loadRecords() {
+            showLoading();
+            const res = await apiRequest("/medical/records");
+            hideLoading();
+
+            if (res?.ok) {
+                renderTimeline(res.data.records || []);
+            }
+        }
+
+        function renderTimeline(records) {
+            const container = document.getElementById("records-timeline");
+
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3>No medical records yet</h3>
+                        <p>Upload your first medical record to start your health timeline.</p>
+                        <a href="/pages/uploadReport.html" class="btn btn-primary mt-2">📤 Upload Record</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const typeIcons = {
+                'blood_test': '🩸',
+                'prescription': '💊',
+                'scan': '🔬',
+                'consultation': '🩺',
+                'report': '📄'
+            };
+
+            container.innerHTML = `
+                <div class="timeline">
+                    ${records.map(r => `
+                        <div class="timeline-item">
+                            <div class="timeline-date">${formatDate(r.createdAt)}</div>
+                            <div class="timeline-title">
+                                ${typeIcons[r.recordType] || '📋'} ${r.title}
+                            </div>
+                            <div class="timeline-desc">${r.description || r.recordType}</div>
+                            ${r.filePath ? `
+                                <a href="${r.filePath}" target="_blank" class="btn btn-outline btn-sm mt-1">
+                                    📥 View File
+                                </a>
+                            ` : ''}
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+[
+  {
+    "userId": "c4e6098a-eace-4176-8d5a-baa9b5435f53",
+    "bloodGroup": "O+",
+    "gender": "Male",
+    "allergies": [],
+    "createdAt": "2026-03-09T07:02:54.326711",
+    "_seeded": true,
+    "_id": "f2e4aaf0-3a74-4cd7-be44-2534c77d662d"
+  },
+  {
+    "userId": "ecc5a2a5-49a7-4b04-95c9-e045fb931f6c",
+    "bloodGroup": "B+",
+    "gender": "Female",
+    "allergies": [],
+    "createdAt": "2026-03-09T07:02:54.543268",
+    "_seeded": true,
+    "_id": "b9cc0364-f589-4d53-baee-1755078e2b2d"
+  },
+  {
+    "userId": "7bb535da-4b0a-43e8-953c-8a19ba28627e",
+    "bloodGroup": "A+",
+    "gender": "Male",
+    "allergies": [],
+    "createdAt": "2026-03-09T07:02:54.758816",
+    "_seeded": true,
+    "_id": "8a774c3d-5263-43b9-9e50-441919f30db6"
+  }
+]

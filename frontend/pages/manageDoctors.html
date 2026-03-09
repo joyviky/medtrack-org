@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Manage Doctors</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">A</div>
+                <div class="user-details"><h3 id="sidebar-name">Admin</h3><p id="sidebar-role">admin</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Dashboard</div>
+            <a href="/pages/adminDashboard.html">📊 Overview</a>
+            <a href="/pages/analyticsPage.html">📈 Analytics</a>
+            <div class="nav-section">Management</div>
+            <a href="/pages/manageDoctors.html" class="active">👨‍⚕️ Doctors</a>
+            <a href="/pages/managePatients.html">👥 Patients</a>
+            <div class="nav-section">System</div>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+            <a href="/pages/supportPage.html">🆘 Support</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>👨‍⚕️ Manage Doctors</h2><p>Verify, manage and monitor doctors</p></div>
+        </div>
+
+        <div class="search-bar mb-3">
+            <input type="text" id="search-input" placeholder="🔍 Search by name or specialization..." oninput="filterDoctors()">
+            <select id="filter-status" onchange="filterDoctors()" style="padding:12px 20px;border:2px solid var(--border);border-radius:var(--radius-full);font-family:inherit;outline:none;background:var(--bg-card);">
+                <option value="">All Doctors</option>
+                <option value="verified">Verified</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <div class="card-body" style="padding:0;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Experience</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctors-table">
+                            <tr><td colspan="6" style="text-align:center;padding:40px;"><div class="spinner spinner-lg spinner-primary" style="margin:0 auto;"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Doctor Detail Modal -->
+<div class="modal-overlay" id="doctor-modal">
+    <div class="modal" style="max-width:600px;">
+        <div class="modal-header">
+            <h3>👨‍⚕️ Doctor Details</h3>
+            <button class="modal-close" onclick="document.getElementById('doctor-modal').classList.remove('active')">✕</button>
+        </div>
+        <div class="modal-body" id="doctor-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-danger btn-sm" onclick="removeDoctor()">🗑️ Remove</button>
+            <button id="verify-btn" class="btn btn-success btn-sm" onclick="verifyDoctor()">✅ Verify</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let allDoctors = [];
+let selectedDoctorId = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireRole("admin")) return;
+    setupSidebar();
+    loadDoctors();
+});
+
+async function loadDoctors() {
+    const res = await apiRequest("/admin/doctors");
+    allDoctors = res?.data?.doctors || [];
+    renderDoctors(allDoctors);
+}
+
+function filterDoctors() {
+    const q = document.getElementById("search-input").value.toLowerCase();
+    const status = document.getElementById("filter-status").value;
+    let filtered = allDoctors.filter(d =>
+        (d.fullName?.toLowerCase().includes(q) || d.specialization?.toLowerCase().includes(q))
+    );
+    if (status === "verified") filtered = filtered.filter(d => d.isVerified);
+    if (status === "pending") filtered = filtered.filter(d => !d.isVerified);
+    renderDoctors(filtered);
+}
+
+function renderDoctors(doctors) {
+    const tbody = document.getElementById("doctors-table");
+    if (!doctors.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:40px;"><div class="empty-icon">👨‍⚕️</div><h3>No doctors found</h3></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = doctors.map(d => `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="doctor-avatar" style="width:36px;height:36px;font-size:0.9rem;">${d.fullName?.charAt(0)||"D"}</div>
+                    <div><strong>Dr. ${d.fullName}</strong><p style="font-size:0.8rem;color:var(--text-secondary);">${d.email}</p></div>
+                </div>
+            </td>
+            <td>${d.specialization}</td>
+            <td>${d.experience||0} yrs</td>
+            <td>⭐ ${(d.rating||0).toFixed(1)}</td>
+            <td><span class="badge ${d.isVerified?'badge-completed':'badge-pending'}">${d.isVerified?'Verified':'Pending'}</span></td>
+            <td>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-outline btn-sm" onclick="viewDoctor('${d._id}')">View</button>
+                    ${!d.isVerified ? `<button class="btn btn-success btn-sm" onclick="quickVerify('${d._id}')">✅</button>` : ''}
+                </div>
+            </td>
+        </tr>`).join("");
+}
+
+function viewDoctor(id) {
+    const d = allDoctors.find(x => x._id === id);
+    if (!d) return;
+    selectedDoctorId = id;
+    document.getElementById("doctor-modal-body").innerHTML = `
+        <div class="rx-item"><span class="rx-label">Name</span><span>Dr. ${d.fullName}</span></div>
+        <div class="rx-item"><span class="rx-label">Email</span><span>${d.email}</span></div>
+        <div class="rx-item"><span class="rx-label">Specialization</span><span>${d.specialization}</span></div>
+        <div class="rx-item"><span class="rx-label">Qualification</span><span>${d.qualification||"—"}</span></div>
+        <div class="rx-item"><span class="rx-label">Experience</span><span>${d.experience||0} years</span></div>
+        <div class="rx-item"><span class="rx-label">Fee</span><span>₹${d.consultationFee||500}</span></div>
+        <div class="rx-item"><span class="rx-label">Rating</span><span>⭐ ${(d.rating||0).toFixed(1)} (${(d.reviews||[]).length} reviews)</span></div>
+        <div class="rx-item"><span class="rx-label">Status</span><span class="badge ${d.isVerified?'badge-completed':'badge-pending'}">${d.isVerified?'Verified':'Pending'}</span></div>`;
+    const verifyBtn = document.getElementById("verify-btn");
+    verifyBtn.style.display = d.isVerified ? "none" : "inline-flex";
+    document.getElementById("doctor-modal").classList.add("active");
+}
+
+async function quickVerify(id) {
+    selectedDoctorId = id;
+    await verifyDoctor();
+}
+
+async function verifyDoctor() {
+    const res = await apiRequest(`/admin/doctors/${selectedDoctorId}/verify`, "PUT");
+    if (res?.ok) {
+        showToast("Doctor verified!", "success");
+        document.getElementById("doctor-modal").classList.remove("active");
+        loadDoctors();
+    } else showToast(res?.data?.error || "Failed", "error");
+}
+
+async function removeDoctor() {
+    if (!confirm("Remove this doctor?")) return;
+    const res = await apiRequest(`/admin/doctors/${selectedDoctorId}`, "DELETE");
+    if (res?.ok) {
+        showToast("Doctor removed!", "success");
+        document.getElementById("doctor-modal").classList.remove("active");
+        loadDoctors();
+    } else showToast(res?.data?.error || "Failed", "error");
+}
+</script>
+</body>
+</html>

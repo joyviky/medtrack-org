@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MedTrack – Smart Hospital Management. Login to manage appointments, medical records, and more.">
+    <title>MedTrack – Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="auth-container">
+    <!-- Left Panel -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <div class="logo-icon">🏥</div>
+            <h1>Med<span>Track</span></h1>
+            <p>Your complete healthcare companion. Manage appointments, records, and connect with top doctors.</p>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="feat-icon">📅</div>
+                    <div><strong>Easy Scheduling</strong><p>Book appointments with top doctors in seconds</p></div>
+                </div>
+                <div class="auth-feature">
+                    <div class="feat-icon">📁</div>
+                    <div><strong>Medical Records</strong><p>All your health records in one secure place</p></div>
+                </div>
+                <div class="auth-feature">
+                    <div class="feat-icon">🔔</div>
+                    <div><strong>Smart Reminders</strong><p>Never miss an appointment with smart alerts</p></div>
+                </div>
+                <div class="auth-feature">
+                    <div class="feat-icon">🚨</div>
+                    <div><strong>Emergency Care</strong><p>Instant access to emergency consultations</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="auth-right">
+        <div class="auth-form-wrap">
+            <div class="logo-mobile">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🏥</div>
+                <h1>MedTrack</h1>
+                <p style="color:var(--text-secondary);margin-top:4px;">Smart Hospital Management</p>
+            </div>
+
+            <h2>Welcome back 👋</h2>
+            <p>Sign in to access your health dashboard</p>
+
+            <form id="login-form" style="margin-top:32px;">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div style="position:relative;">
+                        <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:48px;">
+                        <button type="button" onclick="togglePassword()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;" id="eye-btn">👁️</button>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.875rem;">
+                        <input type="checkbox" id="remember-me" style="width:auto;"> Remember me
+                    </label>
+                    <a href="#" style="font-size:0.875rem;font-weight:600;">Forgot password?</a>
+                </div>
+
+                <button type="submit" id="login-btn" class="btn btn-primary btn-block btn-lg">
+                    Sign In →
+                </button>
+            </form>
+
+            <div style="text-align:center;margin-top:24px;">
+                <p style="color:var(--text-secondary);font-size:0.9rem;">Don't have an account? <a href="/pages/register.html" style="font-weight:700;">Create one free</a></p>
+            </div>
+
+            <div style="margin-top:16px;">
+                <p style="text-align:center;font-size:0.78rem;color:var(--text-light);margin-bottom:10px;letter-spacing:0.04em;text-transform:uppercase;font-weight:600;">— Try Demo Accounts —</p>
+                <div style="display:flex;gap:10px;">
+                    <button type="button" class="btn btn-secondary btn-sm" style="flex:1;font-size:0.82rem;" onclick="demoLogin('patient')">👤 Patient</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="flex:1;font-size:0.82rem;" onclick="demoLogin('doctor')">🩺 Doctor</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="flex:1;font-size:0.82rem;" onclick="demoLogin('admin')">🛡️ Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/login.js"></script>
+<script>
+function togglePassword() {
+    const input = document.getElementById("password");
+    const btn = document.getElementById("eye-btn");
+    if (input.type === "password") { input.type = "text"; btn.textContent = "🙈"; }
+    else { input.type = "password"; btn.textContent = "👁️"; }
+}
+
+async function demoLogin(role) {
+    const creds = {
+        patient: { email: "vignesh@demo.com",   password: "demo123"  },
+        doctor:  { email: "arun@demo.com",       password: "demo123"  },
+        admin:   { email: "admin@medtrack.com",  password: "admin123" }
+    };
+    const { email, password } = creds[role];
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = "Logging in...";
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            const user = data.user;
+            saveAuth(data.token, {
+                _id: user.id, fullName: user.fullName,
+                role: user.role, email: user.email
+            });
+            const redirect = {
+                patient: "/pages/patientDashboard.html",
+                doctor:  "/pages/doctorDashboard.html",
+                admin:   "/pages/adminDashboard.html"
+            };
+            window.location.href = redirect[user.role];
+        } else {
+            showToast(data.error || "Demo login failed", "error");
+            btn.disabled = false;
+            btn.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        }
+    } catch(e) {
+        showToast("Server not running. Start the Flask server first.", "error");
+        btn.disabled = false;
+        btn.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    }
+}
+</script>
+</body>
+</html>

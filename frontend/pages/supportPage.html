@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Help & Support</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">U</div>
+                <div class="user-details"><h3 id="sidebar-name">User</h3><p id="sidebar-role">user</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Navigation</div>
+            <a href="javascript:history.back()">← Go Back</a>
+            <a href="/pages/healthTips.html">💡 Health Tips</a>
+            <a href="/pages/supportPage.html" class="active">🆘 Support</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>🆘 Help & Support</h2><p>We're here to help you 24/7</p></div>
+        </div>
+
+        <!-- Contact Cards (rendered by JS) -->
+        <div class="stats-grid mb-3" id="contact-cards"></div>
+
+        <div class="grid-2 mb-3">
+            <!-- Contact Form -->
+            <div class="card" id="chat-section">
+                <div class="card-header"><h3>📬 Contact Us</h3></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="support-name" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="support-email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="support-category">
+                            <option>Appointment Issue</option>
+                            <option>Account Problem</option>
+                            <option>Payment Inquiry</option>
+                            <option>Technical Issue</option>
+                            <option>Doctor Complaint</option>
+                            <option>Feature Request</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="support-message" rows="4" placeholder="Describe your issue in detail..."></textarea>
+                    </div>
+                    <div style="display:flex;gap:12px;">
+                        <select id="support-priority" style="flex:1;padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                        <button class="btn btn-primary" style="flex:2;" onclick="submitSupport()">📤 Submit Ticket</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="card" id="faq-section">
+                <div class="card-header"><h3>❓ Frequently Asked Questions</h3></div>
+                <div class="card-body" id="faq-list"></div>
+            </div>
+        </div>
+
+        <!-- Support Tickets -->
+        <div class="card">
+            <div class="card-header"><h3>📋 My Support Tickets</h3></div>
+            <div class="card-body" id="tickets-list"></div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const FAQS = [
+    ["How do I book an appointment?", "Go to 'Find Doctor', select your doctor, and click 'Book Appointment'. Choose a date and time slot to confirm."],
+    ["Can I cancel my appointment?", "Yes, you can cancel appointments up to 24 hours before. Go to 'My Appointments' and click Cancel."],
+    ["How do I view my prescription?", "After your consultation, prescriptions appear in 'Medical Records' > 'Prescriptions'."],
+    ["What is emergency booking?", "Emergency booking lets you find the next available doctor for urgent, non-life-threatening needs."],
+    ["How do I update my profile?", "Go to 'My Profile' in the sidebar and click 'Edit Profile' to update your information."],
+    ["How are doctors verified?", "Doctors are manually verified by our admin team before they can receive appointments."],
+];
+
+const CONTACTS = [
+    { icon: "💬", title: "Live Chat",        sub: "Available 24/7",          label: "Start Chat",  href: "#chat-section" },
+    { icon: "📧", title: "Email Support",    sub: "support@medtrack.in",     label: "Send Email",  href: "mailto:support@medtrack.in" },
+    { icon: "📞", title: "Phone Support",    sub: "1800-MED-TRACK",          label: "Call Now",    href: "tel:18006337222" },
+    { icon: "📖", title: "Documentation",    sub: "Guides & Tutorials",      label: "View Docs",   href: "#faq-section" },
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireAuth()) return;
+    setupSidebar();
+    renderContactCards();
+    renderFAQs();
+    renderTickets();
+
+    const user = getUser();
+    if (user) {
+        document.getElementById("support-name").value  = user.fullName || "";
+        document.getElementById("support-email").value = user.email    || "";
+    }
+});
+
+function renderContactCards() {
+    const container = document.getElementById("contact-cards");
+    container.innerHTML = CONTACTS.map(c => `
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='${c.href}'">
+            <div class="stat-icon blue" style="font-size:1.6rem;">${c.icon}</div>
+            <div class="stat-value" style="font-size:1.1rem;">${c.title}</div>
+            <div class="stat-label">${c.sub}</div>
+            <a href="${c.href}" class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="event.stopPropagation()">${c.label}</a>
+        </div>`).join("");
+}
+
+function renderFAQs() {
+    document.getElementById("faq-list").innerHTML = FAQS.map((f, i) => `
+        <div style="border-bottom:1px solid var(--border-light);">
+            <button onclick="toggleFaq(${i})" style="width:100%;background:none;border:none;padding:16px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;color:var(--text);text-align:left;">
+                <span>${f[0]}</span>
+                <span id="faq-icon-${i}" style="color:var(--primary);font-size:1.2rem;flex-shrink:0;margin-left:12px;">+</span>
+            </button>
+            <div id="faq-answer-${i}" style="display:none;padding:0 0 16px;color:var(--text-secondary);font-size:0.88rem;line-height:1.7;">${f[1]}</div>
+        </div>`).join("");
+}
+
+function toggleFaq(i) {
+    const el   = document.getElementById(`faq-answer-${i}`);
+    const icon = document.getElementById(`faq-icon-${i}`);
+    const open = el.style.display === "none";
+    el.style.display = open ? "block" : "none";
+    icon.textContent = open ? "−" : "+";
+}
+
+function submitSupport() {
+    const name     = document.getElementById("support-name").value.trim();
+    const email    = document.getElementById("support-email").value.trim();
+    const category = document.getElementById("support-category").value;
+    const message  = document.getElementById("support-message").value.trim();
+    const priority = document.getElementById("support-priority").value;
+
+    if (!name || !email || !message) {
+        showToast("Please fill in all required fields", "warning");
+        return;
+    }
+
+    const ticket = {
+        id:        "TKT-" + Date.now().toString().slice(-6),
+        category, message, priority,
+        status:    "open",
+        createdAt: new Date().toISOString()
+    };
+
+    const existing = JSON.parse(localStorage.getItem("support_tickets") || "[]");
+    existing.unshift(ticket);
+    localStorage.setItem("support_tickets", JSON.stringify(existing));
+
+    showToast(`Ticket ${ticket.id} submitted! We'll respond within 24h.`, "success");
+    document.getElementById("support-message").value = "";
+    renderTickets();
+}
+
+function renderTickets() {
+    const tickets   = JSON.parse(localStorage.getItem("support_tickets") || "[]");
+    const container = document.getElementById("tickets-list");
+
+    if (!tickets.length) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding:40px;">
+                <div class="empty-icon">🎫</div>
+                <h3>No tickets yet</h3>
+                <p>Submit a ticket above to get help from our team.</p>
+            </div>`;
+        return;
+    }
+
+    const badgeMap = { urgent: "badge-emergency", high: "badge-pending", medium: "badge-approved", low: "badge-completed" };
+
+    container.innerHTML = tickets.slice(0, 10).map(t => `
+        <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-light);">
+            <div>
+                <strong style="font-size:0.9rem;">${t.id}</strong>
+                <p style="font-size:0.78rem;color:var(--text-secondary);">${t.category}</p>
+            </div>
+            <p style="flex:1;font-size:0.88rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.message}</p>
+            <span class="badge ${badgeMap[t.priority] || 'badge-approved'}">${t.priority}</span>
+            <span class="badge badge-approved">${t.status}</span>
+            <span style="font-size:0.78rem;color:var(--text-light);">${formatDate(t.createdAt)}</span>
+        </div>`).join("");
+}
+</script>
+</body>
+</html>

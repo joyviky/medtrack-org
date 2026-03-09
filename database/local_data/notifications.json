@@ -1,0 +1,22 @@
+[
+  {
+    "userId": "c4e6098a-eace-4176-8d5a-baa9b5435f53",
+    "title": "Appointment Confirmed",
+    "message": "Your appointment with Dr. Arun Kumar is confirmed.",
+    "type": "appointment",
+    "readStatus": false,
+    "createdAt": "2026-03-09T07:02:54.977909",
+    "_seeded": true,
+    "_id": "8ca14b26-9d0b-4e5c-ab50-6f636093f2ea"
+  },
+  {
+    "userId": "c4e6098a-eace-4176-8d5a-baa9b5435f53",
+    "title": "Welcome to MedTrack!",
+    "message": "Your account is active. Book your first appointment today.",
+    "type": "info",
+    "readStatus": true,
+    "createdAt": "2026-03-09T07:02:54.978051",
+    "_seeded": true,
+    "_id": "c88dea9d-69a1-41df-9f45-9dbde7901ad8"
+  }
+]

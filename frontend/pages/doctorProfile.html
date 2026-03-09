@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Doctor Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">P</div>
+                <div class="user-details">
+                    <h3 id="sidebar-name">Patient</h3>
+                    <p id="sidebar-role">patient</p>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="/pages/patientDashboard.html">📊 Dashboard</a>
+            <a href="/pages/searchDoctor.html">🔍 Find Doctor</a>
+            <a href="/pages/bookAppointment.html">📅 Book Appointment</a>
+            <div class="nav-section">My Health</div>
+            <a href="/pages/patientAppointments.html">📋 My Appointments</a>
+            <a href="/pages/medicalRecords.html">📁 Medical Records</a>
+            <a href="/pages/appointmentHistory.html">🕐 History</a>
+            <div class="nav-section">Account</div>
+            <a href="/pages/patientProfile.html">👤 My Profile</a>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div id="doctor-profile-content">
+            <div class="flex-center" style="padding:80px;"><div class="spinner spinner-lg spinner-primary"></div></div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="book-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>📅 Book Appointment</h3>
+            <button class="modal-close" onclick="document.getElementById('book-modal').classList.remove('active')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Select Date</label>
+                <input type="date" id="book-date" min="">
+            </div>
+            <div class="form-group">
+                <label>Reason for Visit</label>
+                <textarea id="book-reason" rows="3" placeholder="Describe your symptoms or reason..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="proceedToBook()">Continue to Book →</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="review-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>⭐ Write a Review</h3>
+            <button class="modal-close" onclick="document.getElementById('review-modal').classList.remove('active')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Your Rating</label>
+                <div class="stars" id="review-stars">
+                    <span class="star" data-val="1" onclick="setRating(1)">★</span>
+                    <span class="star" data-val="2" onclick="setRating(2)">★</span>
+                    <span class="star" data-val="3" onclick="setRating(3)">★</span>
+                    <span class="star" data-val="4" onclick="setRating(4)">★</span>
+                    <span class="star" data-val="5" onclick="setRating(5)">★</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Comments</label>
+                <textarea id="review-comment" rows="3" placeholder="Share your experience..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="submitReview()">Submit Review</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let doctorData = null;
+let selectedRating = 0;
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireAuth()) return;
+    setupSidebar();
+    const params = new URLSearchParams(window.location.search);
+    const doctorId = params.get("id");
+    if (!doctorId) { window.history.back(); return; }
+    loadDoctorProfile(doctorId);
+    document.getElementById("book-date").min = new Date().toISOString().split("T")[0];
+});
+
+async function loadDoctorProfile(id) {
+    const res = await apiRequest(`/doctors/${id}`);
+    const container = document.getElementById("doctor-profile-content");
+
+    if (!res?.ok) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><h3>Doctor not found</h3></div>`;
+        return;
+    }
+
+    doctorData = res.data.doctor;
+    const d = doctorData;
+    const initials = d.fullName?.split(" ").map(n=>n[0]).join("").slice(0,2) || "Dr";
+    const stars = "★".repeat(Math.round(d.rating||0)) + "☆".repeat(5 - Math.round(d.rating||0));
+
+    const reviewsHtml = (d.reviews||[]).length > 0
+        ? (d.reviews||[]).map(r => `
+            <div class="card mb-2" style="padding:20px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <div class="doctor-avatar" style="width:40px;height:40px;font-size:1rem;">${r.patientName?.charAt(0)||"P"}</div>
+                    <div>
+                        <strong>${r.patientName||"Patient"}</strong>
+                        <div style="color:var(--warning);font-size:0.9rem;">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</div>
+                    </div>
+                    <span style="margin-left:auto;font-size:0.8rem;color:var(--text-light);">${formatDate(r.createdAt)}</span>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;">${r.comment||""}</p>
+            </div>`).join("")
+        : `<div class="empty-state" style="padding:40px;"><div class="empty-icon">⭐</div><h3>No reviews yet</h3></div>`;
+
+    container.innerHTML = `
+        <div class="profile-header">
+            <div class="profile-avatar">${initials}</div>
+            <div class="profile-info">
+                <h2>Dr. ${d.fullName}</h2>
+                <p>${d.specialization} · ${d.qualification||"MBBS"}</p>
+                <div class="profile-meta">
+                    <span>🏥 ${d.experience||0} yrs exp</span>
+                    <span>💰 ₹${d.consultationFee||500}</span>
+                    <span>⭐ ${(d.rating||0).toFixed(1)} (${(d.reviews||[]).length} reviews)</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="margin-left:auto;flex-shrink:0;" onclick="document.getElementById('book-modal').classList.add('active')">
+                📅 Book Appointment
+            </button>
+        </div>
+
+        <div class="grid-2 mb-3">
+            <div class="card">
+                <div class="card-header"><h3>👨‍⚕️ About</h3></div>
+                <div class="card-body">
+                    <div class="rx-item"><span class="rx-label">Specialization</span><span>${d.specialization}</span></div>
+                    <div class="rx-item"><span class="rx-label">Qualification</span><span>${d.qualification||"MBBS"}</span></div>
+                    <div class="rx-item"><span class="rx-label">Experience</span><span>${d.experience||0} years</span></div>
+                    <div class="rx-item"><span class="rx-label">Language</span><span>English, Tamil</span></div>
+                    <div class="rx-item"><span class="rx-label">Consultation</span><span>₹${d.consultationFee||500}</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>📅 Available Days</h3></div>
+                <div class="card-body">
+                    <div class="schedule-grid">
+                        ${["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].map(day => {
+                            const slot = d.schedule?.find?.(s => s.day===day);
+                            const active = slot?.isAvailable;
+                            return `<div class="schedule-day ${active?"active":"inactive"}">
+                                <h4>${day.slice(0,3).toUpperCase()}</h4>
+                                <div class="time">${active ? (slot.startTime+' - '+slot.endTime) : "Off"}</div>
+                            </div>`;
+                        }).join("")}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>⭐ Reviews (${(d.reviews||[]).length})</h3>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('review-modal').classList.add('active')">Write Review</button>
+            </div>
+            <div class="card-body">${reviewsHtml}</div>
+        </div>`;
+}
+
+function setRating(val) {
+    selectedRating = val;
+    document.querySelectorAll("#review-stars .star").forEach((s,i) => {
+        s.classList.toggle("filled", i < val);
+    });
+}
+
+async function submitReview() {
+    if (!selectedRating) { showToast("Please select a rating","warning"); return; }
+    const comment = document.getElementById("review-comment").value;
+    const params = new URLSearchParams(window.location.search);
+    const res = await apiRequest(`/doctors/${params.get("id")}/review`, "POST", { rating: selectedRating, comment });
+    if (res?.ok) {
+        showToast("Review submitted!","success");
+        document.getElementById("review-modal").classList.remove("active");
+        loadDoctorProfile(params.get("id"));
+    } else showToast(res?.data?.error||"Failed","error");
+}
+
+function proceedToBook() {
+    const date = document.getElementById("book-date").value;
+    const reason = document.getElementById("book-reason").value;
+    if (!date) { showToast("Please select a date","warning"); return; }
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = `/pages/bookAppointment.html?doctorId=${params.get("id")}&date=${date}&reason=${encodeURIComponent(reason)}`;
+}
+</script>
+</body>
+</html>

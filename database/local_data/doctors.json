@@ -1,0 +1,418 @@
+[
+  {
+    "userId": "ddc10f78-14b6-494a-9b73-a7816a9c7d2c",
+    "specialization": "Cardiology",
+    "qualification": "MBBS, MD (Cardiology)",
+    "experienceYears": 12,
+    "consultationFee": 800,
+    "bio": "Senior cardiologist with 12+ years of experience in heart disease management.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 3.5,
+    "reviewCount": 12,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:52.590655",
+    "_id": "ddeed5ca-b2a9-4fc9-9ba1-1d307b58d17b"
+  },
+  {
+    "userId": "9b62e265-434e-41d8-957f-2c4941a207fc",
+    "specialization": "Dermatology",
+    "qualification": "MBBS, MD (Dermatology)",
+    "experienceYears": 8,
+    "consultationFee": 600,
+    "bio": "Expert in skin disorders, cosmetic dermatology and allergy treatments.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 4.5,
+    "reviewCount": 8,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:52.806710",
+    "_id": "183437a3-f13f-4c12-bb17-91a35fa8c2bf"
+  },
+  {
+    "userId": "8a2bd805-782b-4fc5-9b85-0a75107a96c4",
+    "specialization": "Neurology",
+    "qualification": "MBBS, DM (Neurology)",
+    "experienceYears": 15,
+    "consultationFee": 1000,
+    "bio": "Specialist in neurological disorders, headaches, and epilepsy management.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 3.5,
+    "reviewCount": 15,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:53.023496",
+    "_id": "6f034f7f-143a-4b3a-94bc-2bb22a2f75a4"
+  },
+  {
+    "userId": "36fdf51d-a462-406c-a0cc-ac56e7bb3012",
+    "specialization": "Pediatrics",
+    "qualification": "MBBS, MD (Pediatrics)",
+    "experienceYears": 6,
+    "consultationFee": 500,
+    "bio": "Compassionate pediatrician providing complete child healthcare from birth to 18.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 3.5,
+    "reviewCount": 6,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:53.241202",
+    "_id": "fb316907-c620-4e48-8c8c-cad3c9587f48"
+  },
+  {
+    "userId": "f18b4864-fe78-47b2-bc71-8fea9f6b03d2",
+    "specialization": "Orthopedics",
+    "qualification": "MBBS, MS (Ortho)",
+    "experienceYears": 10,
+    "consultationFee": 700,
+    "bio": "Orthopedic surgeon specializing in joint replacements and sports injuries.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 4.0,
+    "reviewCount": 10,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:53.460555",
+    "_id": "bf6e9780-7131-4bce-9018-cae49efae607"
+  },
+  {
+    "userId": "734b6c6f-78fb-4f34-b4d3-383a3ea78c13",
+    "specialization": "Gynecology",
+    "qualification": "MBBS, MD (OBG)",
+    "experienceYears": 9,
+    "consultationFee": 650,
+    "bio": "Gynecologist dedicated to women's health from adolescence through menopause.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 3.5,
+    "reviewCount": 9,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:53.676897",
+    "_id": "312fa990-36d5-470c-a979-37f21faf0e13"
+  },
+  {
+    "userId": "55ac88a3-22e2-4d6c-bb53-1423b059aa7c",
+    "specialization": "General Physician",
+    "qualification": "MBBS, MD",
+    "experienceYears": 14,
+    "consultationFee": 400,
+    "bio": "Experienced general physician handling diagnostics, fever, and chronic conditions.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 4.5,
+    "reviewCount": 14,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:53.893200",
+    "_id": "a8793903-e216-4297-8f17-bf4c7e75548a"
+  },
+  {
+    "userId": "a718f095-1d60-4fb3-b994-a4efe3984e59",
+    "specialization": "ENT",
+    "qualification": "MBBS, MS (ENT)",
+    "experienceYears": 7,
+    "consultationFee": 550,
+    "bio": "ENT specialist treating ear, nose, throat disorders and hearing loss.",
+    "availability": {
+      "monday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "tuesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "wednesday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "thursday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "friday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "saturday": {
+        "active": true,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "sunday": {
+        "active": false,
+        "start": "09:00",
+        "end": "17:00"
+      }
+    },
+    "slotDurationMinutes": 30,
+    "isApproved": true,
+    "avgRating": 4.0,
+    "reviewCount": 7,
+    "_seeded": true,
+    "createdAt": "2026-03-09T07:02:54.110349",
+    "_id": "b10823b8-d257-499f-9422-486bc1fa5e46"
+  }
+]

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Emergency Booking</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">P</div>
+                <div class="user-details"><h3 id="sidebar-name">Patient</h3><p id="sidebar-role">patient</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="/pages/patientDashboard.html">📊 Dashboard</a>
+            <a href="/pages/searchDoctor.html">🔍 Find Doctor</a>
+            <a href="/pages/bookAppointment.html">📅 Book Appointment</a>
+            <div class="nav-section">My Health</div>
+            <a href="/pages/patientAppointments.html">📋 My Appointments</a>
+            <a href="/pages/medicalRecords.html">📁 Medical Records</a>
+            <a href="/pages/appointmentHistory.html">🕐 History</a>
+            <div class="nav-section">Quick Actions</div>
+            <a href="/pages/emergencyBooking.html" class="active">🚨 Emergency</a>
+            <a href="/pages/healthTips.html">💡 Health Tips</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <!-- Emergency Banner -->
+        <div style="background:linear-gradient(135deg,#dc2626,#ef4444);color:white;border-radius:var(--radius-lg);padding:32px;margin-bottom:32px;display:flex;align-items:center;gap:24px;">
+            <div style="font-size:4rem;animation:pulse 1.5s infinite;">🚨</div>
+            <div>
+                <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:4px;">Emergency Medical Booking</h2>
+                <p style="opacity:0.9;">For life-threatening emergencies, call <strong>108</strong> immediately. For urgent non-critical care, use the form below.</p>
+            </div>
+            <a href="tel:108" class="btn" style="background:white;color:#dc2626;font-weight:700;margin-left:auto;flex-shrink:0;font-size:1.1rem;padding:14px 28px;">📞 Call 108</a>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><h3>🚑 Book Emergency Appointment</h3></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Emergency Type</label>
+                        <select id="emergency-type">
+                            <option>Cardiac Emergency</option>
+                            <option>Respiratory Distress</option>
+                            <option>Severe Injury / Trauma</option>
+                            <option>Neurological Emergency</option>
+                            <option>Severe Allergic Reaction</option>
+                            <option>High Fever / Seizure</option>
+                            <option>Other Critical Condition</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Describe the Emergency</label>
+                        <textarea id="emergency-desc" rows="3" placeholder="Describe symptoms, severity, and how long..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Patient Name</label>
+                        <input type="text" id="patient-name-input" placeholder="Patient full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Number</label>
+                        <input type="tel" id="contact-number" placeholder="+91 98765 43210">
+                    </div>
+                    <div id="available-doctors" style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:8px;">Select Available Doctor</label>
+                        <div id="doc-list" style="max-height:200px;overflow-y:auto;border:2px solid var(--border);border-radius:var(--radius-sm);"></div>
+                    </div>
+                    <button class="btn btn-emergency btn-block btn-lg" onclick="bookEmergency()">🚨 Book Emergency Now</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="card mb-3">
+                    <div class="card-header"><h3>📞 Emergency Contacts</h3></div>
+                    <div class="card-body">
+                        ${[
+                            ["🚑 Ambulance", "108"],
+                            ["🚒 Fire Service", "101"],
+                            ["👮 Police", "100"],
+                            ["🏥 Hospital Help", "1800-XXX-XXX"],
+                        ].map(([label, num]) => `
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-light);">
+                                <span style="font-weight:600;">${label}</span>
+                                <a href="tel:${num}" class="btn btn-danger btn-sm">${num}</a>
+                            </div>`).join("")}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>⚠️ First Aid Tips</h3></div>
+                    <div class="card-body">
+                        ${[
+                            ["❤️","Chest Pain","Rest, loosen clothing, call 108"],
+                            ["🩹","Severe Bleeding","Apply firm pressure, elevate"],
+                            ["🧠","Unconsciousness","Recovery position, call 108"],
+                            ["🌡️","High Fever >40°C","Sponge, hydrate, seek care"],
+                        ].map(([icon, title, tip]) => `
+                            <div class="health-alert" style="margin-bottom:8px;flex-direction:column;align-items:flex-start;gap:4px;">
+                                <strong>${icon} ${title}</strong>
+                                <span style="font-size:0.85rem;">${tip}</span>
+                            </div>`).join("")}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let selectedEmergencyDoc = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireAuth()) return;
+    setupSidebar();
+    loadAvailableDoctors();
+    const user = getUser();
+    if (user?.fullName) document.getElementById("patient-name-input").value = user.fullName;
+});
+
+async function loadAvailableDoctors() {
+    const res = await apiRequest("/doctors");
+    const doctors = res?.data?.doctors || [];
+    const container = document.getElementById("doc-list");
+    if (!doctors.length) {
+        container.innerHTML = `<p style="padding:12px;color:var(--text-secondary);">No doctors available right now</p>`;
+        return;
+    }
+    container.innerHTML = doctors.slice(0,8).map(d => `
+        <div onclick="selectDoc('${d._id}', this)" style="display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;border-bottom:1px solid var(--border-light);transition:background 0.2s;" class="doc-option">
+            <div class="doctor-avatar" style="width:36px;height:36px;font-size:0.9rem;">${d.fullName?.charAt(0)||"D"}</div>
+            <div style="flex:1;"><strong style="font-size:0.9rem;">Dr. ${d.fullName}</strong><p style="font-size:0.8rem;color:var(--text-secondary);">${d.specialization}</p></div>
+            <span style="font-size:0.8rem;color:var(--success);font-weight:600;">Available</span>
+        </div>`).join("");
+}
+
+function selectDoc(id, el) {
+    document.querySelectorAll(".doc-option").forEach(e => e.style.background = "");
+    el.style.background = "var(--primary-50)";
+    selectedEmergencyDoc = id;
+}
+
+async function bookEmergency() {
+    if (!selectedEmergencyDoc) { showToast("Please select a doctor", "warning"); return; }
+    const type = document.getElementById("emergency-type").value;
+    const desc = document.getElementById("emergency-desc").value;
+    const today = new Date().toISOString().split("T")[0];
+
+    const res = await apiRequest("/appointments/emergency", "POST", {
+        doctorId: selectedEmergencyDoc,
+        date: today,
+        timeSlot: "ASAP",
+        reason: `EMERGENCY: ${type}. ${desc}`
+    });
+
+    if (res?.ok) {
+        showToast("🚨 Emergency appointment booked!", "success");
+        setTimeout(() => window.location.href = "/pages/patientAppointments.html", 2000);
+    } else showToast(res?.data?.error || "Failed to book", "error");
+}
+</script>
+</body>
+</html>

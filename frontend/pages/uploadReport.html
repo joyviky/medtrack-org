@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Upload medical reports and records on MedTrack.">
+    <title>MedTrack – Upload Report</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">U</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">User</h3>
+                        <p id="sidebar-role">user</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Navigation</div>
+                <a href="#" onclick="goBack()">← Go Back</a>
+                <a href="/pages/medicalRecords.html">📁 Medical Records</a>
+                <a href="/pages/uploadReport.html" class="active">📤 Upload Report</a>
+            </nav>
+            <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Upload Medical Record 📤</h2>
+                    <p>Add a new report, scan, or prescription</p>
+                </div>
+            </div>
+
+            <div class="card" style="max-width: 600px;">
+                <div class="card-body">
+                    <form id="upload-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Record Type</label>
+                            <select id="record-type">
+                                <option value="report">Report</option>
+                                <option value="blood_test">Blood Test</option>
+                                <option value="scan">Scan / X-Ray</option>
+                                <option value="prescription">Prescription</option>
+                                <option value="consultation">Consultation Notes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="record-title" placeholder="e.g., Blood Test Report - Feb 2026" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description (optional)</label>
+                            <textarea id="record-desc" rows="3" placeholder="Any additional notes..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Upload File</label>
+                            <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                                <div class="upload-icon">📁</div>
+                                <p id="file-label">
+                                    Drag & drop or <span class="browse-link">browse</span> to upload
+                                </p>
+                                <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 8px;">
+                                    Supported: PDF, PNG, JPG, DOC, DOCX (Max 16MB)
+                                </p>
+                            </div>
+                            <input type="file" id="file-input" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="fileSelected(this)">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" id="upload-btn">
+                            📤 Upload Record
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAuth()) return;
+            setupSidebar();
+
+            document.getElementById("upload-form").addEventListener("submit", handleUpload);
+        });
+
+        function fileSelected(input) {
+            const label = document.getElementById("file-label");
+            if (input.files.length > 0) {
+                label.innerHTML = `✅ <strong>${input.files[0].name}</strong> selected`;
+            }
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById("file-input");
+            if (!fileInput.files.length) {
+                showToast("Please select a file to upload", "warning");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("recordType", document.getElementById("record-type").value);
+            formData.append("title", document.getElementById("record-title").value);
+            formData.append("description", document.getElementById("record-desc").value);
+
+            const btn = document.getElementById("upload-btn");
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Uploading...';
+
+            const res = await apiRequest("/medical/upload", "POST", formData, true);
+
+            if (res?.ok) {
+                showToast("Record uploaded successfully! ✅", "success");
+                setTimeout(() => {
+                    window.location.href = "/pages/medicalRecords.html";
+                }, 1000);
+            } else {
+                showToast(res?.data?.error || "Upload failed", "error");
+                btn.disabled = false;
+                btn.innerHTML = '📤 Upload Record';
+            }
+        }
+
+        function goBack() { window.history.back(); }
+    </script>
+</body>
+</html>

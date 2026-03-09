@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View your notifications on MedTrack.">
+    <title>MedTrack – Notifications</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">U</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">User</h3>
+                        <p id="sidebar-role">user</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Navigation</div>
+                <a href="#" onclick="goBack()">← Go Back</a>
+                <a href="/pages/notifications.html" class="active">🔔 Notifications</a>
+            </nav>
+            <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Notifications 🔔</h2>
+                    <p>Stay updated with your health activities</p>
+                </div>
+                <button class="btn btn-secondary" onclick="markAllRead()">✅ Mark All Read</button>
+            </div>
+
+            <div class="card">
+                <div id="notifications-list">
+                    <div class="flex-center" style="padding: 60px;">
+                        <div class="spinner spinner-lg spinner-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAuth()) return;
+            setupSidebar();
+            loadNotifications();
+        });
+
+        async function loadNotifications() {
+            showLoading();
+            const res = await apiRequest("/notifications/");
+            hideLoading();
+
+            const container = document.getElementById("notifications-list");
+            const notifs = res?.data?.notifications || [];
+
+            if (notifs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔔</div>
+                        <h3>No notifications</h3>
+                        <p>You're all caught up!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const typeIcons = {
+                'appointment': '📅',
+                'prescription': '💊',
+                'alert': '⚠️',
+                'emergency': '🚨',
+                'info': 'ℹ️'
+            };
+
+            const typeColors = {
+                'appointment': 'var(--primary-100)',
+                'prescription': '#ede9fe',
+                'alert': 'var(--warning-light)',
+                'emergency': 'var(--danger-light)',
+                'info': 'var(--primary-100)'
+            };
+
+            container.innerHTML = notifs.map(n => `
+                <div class="notification-item ${n.readStatus ? '' : 'unread'}" onclick="markRead('${n._id}', this)">
+                    <div class="notif-icon" style="background: ${typeColors[n.type] || typeColors.info};">
+                        ${typeIcons[n.type] || 'ℹ️'}
+                    </div>
+                    <div class="notif-content">
+                        <h4>${n.message}</h4>
+                        <p>${timeAgo(n.createdAt)}</p>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        async function markRead(id, el) {
+            await apiRequest(`/notifications/read/${id}`, "PUT");
+            el.classList.remove("unread");
+        }
+
+        async function markAllRead() {
+            await apiRequest("/notifications/read-all", "PUT");
+            showToast("All notifications marked as read", "success");
+            loadNotifications();
+        }
+
+        function goBack() { window.history.back(); }
+    </script>
+</body>
+</html>

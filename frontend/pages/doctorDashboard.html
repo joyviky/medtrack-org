@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MedTrack Doctor Dashboard - Manage appointments, patients, and schedule.">
+    <title>MedTrack – Doctor Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🏥 Med<span>Track</span></h1>
+                <div class="user-info">
+                    <div class="avatar" id="sidebar-avatar">D</div>
+                    <div class="user-details">
+                        <h3 id="sidebar-name">Doctor</h3>
+                        <p id="sidebar-role">doctor</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">Main</div>
+                <a href="/pages/doctorDashboard.html" class="active">📊 Dashboard</a>
+                <a href="/pages/doctorAppointments.html">📋 Appointments</a>
+
+                <div class="nav-section">Management</div>
+                <a href="/pages/patientProfile.html">👥 Patient Records</a>
+                <a href="/pages/prescriptionView.html">💊 Prescriptions</a>
+                <a href="/pages/uploadReport.html">📤 Upload Records</a>
+
+                <div class="nav-section">Account</div>
+                <a href="/pages/patientProfile.html">👤 My Profile</a>
+                <a href="/pages/notifications.html" class="notification-badge">
+                    🔔 Notifications
+                    <span class="badge-count" id="notif-count" style="display:none;">0</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="#" onclick="logout()">🚪 Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>Doctor Dashboard 🩺</h2>
+                    <p>Manage your appointments and patients</p>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">📋</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total Appointments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">⏳</div>
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div class="stat-label">Pending Approval</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div class="stat-value" id="stat-today">0</div>
+                    <div class="stat-label">Today's Appointments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">🚨</div>
+                    <div class="stat-value" id="stat-emergency">0</div>
+                    <div class="stat-label">Emergency</div>
+                </div>
+            </div>
+
+            <!-- Today's Appointments -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>📅 Today's Appointments</h3>
+                    <a href="/pages/doctorAppointments.html" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                <div class="card-body" id="today-appointments">
+                    <div class="flex-center" style="padding: 40px;">
+                        <div class="spinner spinner-lg spinner-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAuth()) return;
+            setupSidebar();
+            loadDoctorDashboard();
+        });
+
+        async function loadDoctorDashboard() {
+            showLoading();
+
+            const today = new Date().toISOString().split('T')[0];
+            const [allRes, todayRes, notifRes] = await Promise.all([
+                apiRequest("/appointments/doctor"),
+                apiRequest(`/appointments/doctor?date=${today}`),
+                apiRequest("/notifications/")
+            ]);
+
+            hideLoading();
+
+            if (allRes?.ok) {
+                const appts = allRes.data.appointments || [];
+                document.getElementById("stat-total").textContent = appts.length;
+                document.getElementById("stat-pending").textContent =
+                    appts.filter(a => a.status === "pending").length;
+                document.getElementById("stat-emergency").textContent =
+                    appts.filter(a => a.isEmergency).length;
+            }
+
+            if (todayRes?.ok) {
+                const todayAppts = todayRes.data.appointments || [];
+                document.getElementById("stat-today").textContent = todayAppts.length;
+                renderTodayAppointments(todayAppts);
+            }
+
+            if (notifRes?.ok) {
+                const badge = document.getElementById("notif-count");
+                if (badge && notifRes.data.unreadCount > 0) {
+                    badge.textContent = notifRes.data.unreadCount;
+                    badge.style.display = "flex";
+                }
+            }
+        }
+
+        function renderTodayAppointments(appointments) {
+            const container = document.getElementById("today-appointments");
+
+            if (appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <h3>No appointments today</h3>
+                        <p>Enjoy your break!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = appointments.map(appt => `
+                <div class="appointment-card ${appt.isEmergency ? 'emergency' : ''}">
+                    <div class="appt-header">
+                        <h4>${appt.patientName || 'Patient'}</h4>
+                        <span class="badge badge-${appt.status}">${appt.status.replace('_', ' ')}</span>
+                    </div>
+                    <div class="appt-details">
+                        <span>🕐 ${appt.timeSlot}</span>
+                        ${appt.isEmergency ? '<span class="badge badge-emergency">EMERGENCY</span>' : ''}
+                    </div>
+                    ${appt.patientAlerts && appt.patientAlerts.length > 0 ? `
+                        <div style="margin-top:8px;">
+                            ${appt.patientAlerts.map(a => `<div class="health-alert danger">⚠️ ${a}</div>`).join("")}
+                        </div>
+                    ` : ''}
+                    <div style="margin-top:12px; display:flex; gap:8px;">
+                        ${appt.status === "pending" ? `
+                            <button class="btn btn-success btn-sm" onclick="handleStatus('${appt._id}', 'approved')">✅ Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="handleStatus('${appt._id}', 'cancelled')">❌ Cancel</button>
+                        ` : ''}
+                        ${appt.status === "approved" ? `
+                            <button class="btn btn-success btn-sm" onclick="handleStatus('${appt._id}', 'completed')">✅ Complete</button>
+                        ` : ''}
+                        <button class="btn btn-outline btn-sm" onclick="window.location.href='/pages/appointmentDetails.html?id=${appt._id}'">View</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        async function handleStatus(id, status) {
+            const res = await apiRequest("/appointments/status", "PUT", {
+                appointmentId: id, status: status
+            });
+            if (res?.ok) {
+                showToast(`Appointment ${status}`, "success");
+                loadDoctorDashboard();
+            } else {
+                showToast(res?.data?.error || "Failed", "error");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack – Manage Patients</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>🏥 Med<span>Track</span></h1>
+            <div class="user-info">
+                <div class="avatar" id="sidebar-avatar">A</div>
+                <div class="user-details"><h3 id="sidebar-name">Admin</h3><p id="sidebar-role">admin</p></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Dashboard</div>
+            <a href="/pages/adminDashboard.html">📊 Overview</a>
+            <a href="/pages/analyticsPage.html">📈 Analytics</a>
+            <div class="nav-section">Management</div>
+            <a href="/pages/manageDoctors.html">👨‍⚕️ Doctors</a>
+            <a href="/pages/managePatients.html" class="active">👥 Patients</a>
+            <div class="nav-section">System</div>
+            <a href="/pages/notifications.html">🔔 Notifications</a>
+            <a href="/pages/supportPage.html">🆘 Support</a>
+        </nav>
+        <div class="sidebar-bottom"><a href="#" onclick="logout()">🚪 Logout</a></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div><h2>👥 Manage Patients</h2><p>View and manage all registered patients</p></div>
+        </div>
+
+        <div class="search-bar mb-3">
+            <input type="text" id="search-input" placeholder="🔍 Search by name or email..." oninput="filterPatients()">
+        </div>
+
+        <div class="card">
+            <div class="card-body" style="padding:0;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Phone</th>
+                                <th>Blood Group</th>
+                                <th>Appointments</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patients-table">
+                            <tr><td colspan="6" style="text-align:center;padding:40px;"><div class="spinner spinner-lg spinner-primary" style="margin:0 auto;"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Patient Detail Modal -->
+<div class="modal-overlay" id="patient-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>👥 Patient Details</h3>
+            <button class="modal-close" onclick="document.getElementById('patient-modal').classList.remove('active')">✕</button>
+        </div>
+        <div class="modal-body" id="patient-modal-body"></div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let allPatients = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!requireRole("admin")) return;
+    setupSidebar();
+    loadPatients();
+});
+
+async function loadPatients() {
+    const res = await apiRequest("/admin/patients");
+    allPatients = res?.data?.patients || [];
+    renderPatients(allPatients);
+}
+
+function filterPatients() {
+    const q = document.getElementById("search-input").value.toLowerCase();
+    const filtered = allPatients.filter(p =>
+        p.fullName?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)
+    );
+    renderPatients(filtered);
+}
+
+function renderPatients(patients) {
+    const tbody = document.getElementById("patients-table");
+    if (!patients.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:40px;"><div class="empty-icon">👥</div><h3>No patients found</h3></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = patients.map(p => `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="doctor-avatar" style="width:36px;height:36px;font-size:0.9rem;background:var(--gradient-cool);">${p.fullName?.charAt(0)||"P"}</div>
+                    <div><strong>${p.fullName}</strong><p style="font-size:0.8rem;color:var(--text-secondary);">${p.email}</p></div>
+                </div>
+            </td>
+            <td>${p.phone||"—"}</td>
+            <td><span class="badge badge-approved">${p.bloodGroup||"Unknown"}</span></td>
+            <td>${p.appointmentCount||0}</td>
+            <td>${formatDate(p.createdAt)}</td>
+            <td><button class="btn btn-outline btn-sm" onclick="viewPatient('${p._id}')">View</button></td>
+        </tr>`).join("");
+}
+
+function viewPatient(id) {
+    const p = allPatients.find(x => x._id === id);
+    if (!p) return;
+    document.getElementById("patient-modal-body").innerHTML = `
+        <div class="rx-item"><span class="rx-label">Name</span><span>${p.fullName}</span></div>
+        <div class="rx-item"><span class="rx-label">Email</span><span>${p.email}</span></div>
+        <div class="rx-item"><span class="rx-label">Phone</span><span>${p.phone||"—"}</span></div>
+        <div class="rx-item"><span class="rx-label">Blood Group</span><span>${p.bloodGroup||"Unknown"}</span></div>
+        <div class="rx-item"><span class="rx-label">Age</span><span>${p.age||"—"}</span></div>
+        <div class="rx-item"><span class="rx-label">Gender</span><span>${p.gender||"—"}</span></div>
+        <div class="rx-item"><span class="rx-label">Allergies</span><span>${(p.allergies||[]).join(", ")||"None"}</span></div>
+        <div class="rx-item"><span class="rx-label">Joined</span><span>${formatDate(p.createdAt)}</span></div>`;
+    document.getElementById("patient-modal").classList.add("active");
+}
+</script>
+</body>
+</html>
